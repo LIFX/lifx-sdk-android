@@ -79,7 +79,14 @@ public class LFXGatewayDescriptor implements Cloneable
 
 	public String toString()
 	{
-		return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path.toString() + ", Protocol: " + getProtocolString();
+		if( path != null)
+		{
+			return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path.toString() + ", Protocol: " + getProtocolString();
+		}
+		else
+		{
+			return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path + ", Protocol: " + getProtocolString();
+		}
 	}
 
 	public boolean equals( LFXGatewayDescriptor aGatewayDescriptor)
@@ -94,12 +101,12 @@ public class LFXGatewayDescriptor implements Cloneable
 			return false;
 		}
 		
-		if( !( aGatewayDescriptor.getPort() == this.port)) 
+		if( aGatewayDescriptor.getPort() != this.port) 
 		{
 			return false;
 		}
 		
-		if( !( aGatewayDescriptor.getService() == this.service)) 
+		if( aGatewayDescriptor.getService() != this.service)
 		{
 			return false;
 		}

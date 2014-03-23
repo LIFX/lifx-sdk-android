@@ -2,6 +2,7 @@ package lifx.java.android.network_context.internal.transport_manager.lan.gateway
 
 import java.util.ArrayList;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import lifx.java.android.constant.LFXSDKConstants;
 import lifx.java.android.entities.internal.LFXBinaryPath;
@@ -127,7 +128,13 @@ public class LFXGatewayDiscoveryController
 		String host = statePanGateway.getSourceNetworkHost();
 		int port = (int) statePanGatewayPayload.getPort().getValue();
 		LFXBinaryPath path = statePanGateway.getPath();
-		Service service = LxProtocolDevice.serviceMap.get( statePanGatewayPayload.getService());
+		Service service = LxProtocolDevice.serviceMap.get( statePanGatewayPayload.getService().getValue());
+		
+		// TODO: remove to enable TCP
+		if( service == Service.LX_PROTOCOL_DEVICE_SERVICE_TCP)
+		{
+			return;
+		}
 		
 		LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService( host, port, path, service);// port:statePanGateway.payload.port path:statePanGateway.path service:statePanGateway.payload.service];
 		
@@ -143,7 +150,6 @@ public class LFXGatewayDiscoveryController
 				break;
 			}
 		}
-	
 		
 		if( tableEntry != null)
 		{
@@ -162,9 +168,7 @@ public class LFXGatewayDiscoveryController
 
 	public void sendGatewayDiscoveryMessage()
 	{
-		//LFXLogVerbose(@"Sending Gateway Discovery Message");
 		LFXMessage getPANGateway = LFXMessage.messageWithType( Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY);
-		//LFXMessageDeviceGetPanGateway *getPANGateway = [LFXMessageDeviceGetPanGateway new];
 		transportManager.sendBroadcastUDPMessage( getPANGateway);
 	}
 
@@ -178,17 +182,24 @@ public class LFXGatewayDiscoveryController
 		configureTimerForDiscoveryMode( discoveryMode);
 	}
 
-	private Runnable discoverTimerTask = new Runnable() 
+	private Runnable getDiscoverTimerTask() 
 	{
-	    public void run() 
-	    {
-	    	discoveryTimerDidFire();
-	    }
-	};
+		Runnable discoverTimerTask = new TimerTask() 
+		{
+		    public void run() 
+		    {
+		    	discoveryTimerDidFire();
+		    }
+		};
+		
+		return discoverTimerTask;
+	}
 	
 	public void configureTimerForDiscoveryMode( LFXGatewayDiscoveryMode discoveryMode)
 	{
-		long duration = 1;
+		System.out.println( "DISCOVERYMODE: " + discoveryMode);
+		
+		long duration = 1000;
 		switch( discoveryMode)
 		{
 			case NORMAL:
@@ -202,14 +213,26 @@ public class LFXGatewayDiscoveryController
 		if( discoveryTimer != null)
 		{
 			discoveryTimer.cancel();
+			discoveryTimer.purge();
 		}
-		
-		discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod( discoverTimerTask, duration);
+
+		System.out.println( "Making Discovery Timer task. Period: " + duration);
+		discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod( getDiscoverTimerTask(), duration, false);
 		//discoveryTimer = [NSTimer scheduledTimerWithTimeInterval:duration target:self selector:@selector(discoveryTimerDidFire:) userInfo:nil repeats:YES];
 	}
 
 	public void discoveryTimerDidFire()
 	{
+		System.out.println( "Discover Timer FIred");
 		sendGatewayDiscoveryMessage();
 	}
+	
+	public void shutDown()
+	{
+		if( discoveryTimer != null)
+		{
+			discoveryTimer.cancel();
+		}
+	}
 }
+

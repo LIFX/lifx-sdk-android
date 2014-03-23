@@ -7,7 +7,7 @@ public class LFXDeviceMapping
 	private String deviceID;
 
 	private LFXSiteID siteID;
-	private TagField tagField;	// The tagField indicating what tags the device belongs to in the context of .siteID
+	private TagField tagField = new TagField();	// The tagField indicating what tags the device belongs to in the context of .siteID
 
 	// This is used for uniqueing in the routing table within a Network Context
 	public boolean matchesDeviceID( String deviceID)

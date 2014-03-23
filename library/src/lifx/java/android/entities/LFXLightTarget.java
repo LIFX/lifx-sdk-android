@@ -13,9 +13,9 @@ public abstract class LFXLightTarget
 	private LFXTarget target;
 	private LFXTargetType targetType;
 	private ArrayList<LFXLight> lights;
-	private String label;
-	private LFXHSBKColor color;
-	private LFXFuzzyPowerState fuzzyPowerState;
+	protected String label;
+	protected LFXHSBKColor color;
+	protected LFXFuzzyPowerState fuzzyPowerState;
 	
 	public LFXTarget getTarget()
 	{

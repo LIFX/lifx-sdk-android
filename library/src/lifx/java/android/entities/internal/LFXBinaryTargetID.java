@@ -3,6 +3,7 @@ package lifx.java.android.entities.internal;
 import java.util.ArrayList;
 
 import lifx.java.android.util.LFXByteUtils;
+import lifx.java.android.util.LFXLog;
 
 public class LFXBinaryTargetID implements Cloneable
 {
@@ -133,10 +134,17 @@ public class LFXBinaryTargetID implements Cloneable
 
 	public static ArrayList<TagField> enumerateTagField( TagField tagField)
 	{
+//		if( tagField == null)
+//		{
+//			return new ArrayL
+//		}
+		
 		ArrayList<TagField> singularTagFields = new ArrayList<TagField>();
 		
 		for( int tagIndex = 0; tagIndex < TAG_TARGET_ID_BITS; tagIndex++)
 		{
+			//LFXLog.Debug( "TagField = " + tagField);
+			
 			if( LFXByteUtils.isBitSet( tagField.tagData, tagIndex))
 			{
 				TagField tempTagField = new TagField();
@@ -279,6 +287,21 @@ public class LFXBinaryTargetID implements Cloneable
 		return false;
 	}
 
+	public boolean equals( LFXBinaryTargetID aTargetID)
+	{
+		if( aTargetID == null)
+		{
+			return false;
+		}
+		
+		if( !LFXByteUtils.areByteArraysEqual( deviceBytes, aTargetID.deviceBytes) )
+		{
+			return false;
+		}
+		
+		return true;
+	}
+	
 	@Override
 	protected Object clone() throws CloneNotSupportedException
 	{

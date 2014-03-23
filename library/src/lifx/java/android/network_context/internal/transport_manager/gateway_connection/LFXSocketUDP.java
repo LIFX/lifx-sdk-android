@@ -5,6 +5,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import lifx.java.android.entities.internal.LFXMessage;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -112,8 +114,6 @@ public class LFXSocketUDP extends LFXSocketGeneric
     	
     	public void publishProgress( SocketMessage[] messages)
     	{
-    		System.out.println( "UDP RecievedMessage");
-    		
     		Message msg = handler.obtainMessage();
     	    msg.what = SOCKET_RECEIVED_MESSAGE;
     	    msg.obj = messages[0];
@@ -209,12 +209,6 @@ public class LFXSocketUDP extends LFXSocketGeneric
                      
                      SocketMessage[] messages = new SocketMessage[]{ message};
                      publishProgress( (SocketMessage[]) messages);
-                     
-//                     // TODO: not the best place for this but will fix later!
-//                     if( MessageUnPacker.getMessageType( messageData) == Type.LX_PROTOCOL_DEVICE_STATE_PAN_GATEWAY)
-//                     {
-//                    	 setLastTraffic( System.currentTimeMillis());
-//                     }
                  }
              } 
              catch( Exception e) 

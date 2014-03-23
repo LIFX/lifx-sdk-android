@@ -15,8 +15,20 @@ import lifx.java.android.network_context.LFXNetworkContext;
 
 public abstract class LFXLightCollection extends LFXLightTarget 
 {
+	public interface LFXLightCollectionListener
+	{
+		public void lightCollectionDidAddLight( LFXLightCollection lightCollection, LFXLight light);
+		public void lightCollectionDidRemoveLight( LFXLightCollection lightCollection,  LFXLight light);
+
+		public void lightCollectionDidChangeLabel( LFXLightCollection lightCollection, String label);
+		public void lightCollectionDidChangeColor( LFXLightCollection lightCollection, LFXHSBKColor color);
+		public void lightCollectionDidChangeFuzzyPowerState( LFXLightCollection lightCollection, LFXFuzzyPowerState fuzzyPowerState);
+	}
+	
 	protected LFXNetworkContext networkContext;
 
+	private ArrayList<LFXLightCollectionListener> listeners = new ArrayList<LFXLightCollectionListener>();
+	
 	protected ArrayList<LFXLight> lights; // LFXLight
 
 	// Convenience method - will return the LFXLight in .lights that matches <deviceID> if it exists
@@ -33,13 +45,11 @@ public abstract class LFXLightCollection extends LFXLightTarget
 
 	public LFXTarget getTarget()
 	{
-		//LFXLogImplementMethod();
 		return null;
 	}
 
 	public LFXTargetType getTargetType()
 	{
-		//LFXLogImplementMethod();
 		return LFXTargetType.TAG;
 	}
 
@@ -120,6 +130,34 @@ public abstract class LFXLightCollection extends LFXLightTarget
 	}
 
 
+	public LFXLight getFirstLightForLabel( String label)
+	{
+		for( LFXLight aLight : getLights())
+		{
+			if( aLight.getLabel() != null && aLight.getLabel().equals( label))
+			{
+				return aLight;
+			}
+		}
+		
+		return null;
+	}
+
+	public ArrayList<LFXLight> getLightsForLabel( String label)
+	{
+		ArrayList<LFXLight> lights = new ArrayList<LFXLight>();
+		
+		for( LFXLight aLight : getLights())
+		{
+			if( aLight.getLabel() != null && aLight.getLabel().equals( label))
+			{
+				lights.add( aLight);
+			}
+		}
+		
+		return lights;
+	}
+	
 //	// Light Control
 //	public void setLabel( String label)
 //	{
@@ -170,4 +208,21 @@ public abstract class LFXLightCollection extends LFXLightTarget
 		lights.clear();
 	}
 	
+	public void addLightCollectionListener( LFXLightCollection lightCollection, LFXLightCollectionListener listener)
+	{
+		if( !listeners.contains( listener))
+		{
+			listeners.add( listener);
+		}
+	} 
+	
+	public void removeAllLightCollectionListeners( LFXLightCollection lightCollection )
+	{
+		listeners.clear();
+	}
+	
+	public void removeLightCollectionListener( LFXLightCollection lightCollection, LFXLightCollectionListener listener)
+	{
+		listeners.remove( listener);
+	}
 }

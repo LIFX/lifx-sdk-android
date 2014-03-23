@@ -41,7 +41,7 @@ public class LFXSiteID implements Cloneable
 		}
 		
 		LFXSiteID siteID = new LFXSiteID();
-		LFXByteUtils.copyBytesIntoByteArray( data, siteID.data);
+		LFXByteUtils.copyBytesIntoByteArray( siteID.data, data);
 		return siteID;
 	}
 	
@@ -88,12 +88,12 @@ public class LFXSiteID implements Cloneable
 			return false;
 		}
 		
-		if( LFXByteUtils.areByteArraysEqual( data, aSiteID.data) )
+		if( !LFXByteUtils.areByteArraysEqual( data, aSiteID.data) )
 		{
-			return true;
+			return false;
 		}
 		
-		return false;
+		return true;
 	}
 
 	@Override

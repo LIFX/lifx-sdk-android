@@ -25,10 +25,17 @@ public class LFXTimerUtils
 		}
 	}
 	
-	public static Timer getTimerTaskWithPeriod( Runnable task, long period)
-	{
+	public static Timer getTimerTaskWithPeriod( Runnable task, long period, boolean immediate)
+	{		
 		Timer timer = new Timer();
-	    timer.schedule( new MainThreadRunnableTimerTask( task), 0, period);
+		long delay = 0L;
+		
+		if( !immediate)
+		{
+			delay = period;
+		}
+		
+		timer.scheduleAtFixedRate( new MainThreadRunnableTimerTask( task), delay, period);
 	    return timer;
 	}
 	

@@ -117,21 +117,25 @@ public abstract class LFXGatewayConnection
 	//protected static boolean newMessage:(LFXMessage *)newMessage makesQueuedMessageRedundant:(LFXMessage *)queuedMessage
 	protected static boolean newMessageMakesQueuedMessageRedundant( LFXMessage newMessage , LFXMessage queuedMessage)
 	{
-		if (newMessage.getType() != queuedMessage.getType()) 				// if the message types are not equal
+		if( newMessage.getType() != queuedMessage.getType()) 				// if the message types are not equal
 		{
 			return false;
 		}
 		
 		if( !newMessage.getPath().equals( queuedMessage.getPath()))			// if the message paths are not equal
 		{
+			System.out.println( "Paths are not equal.");
+			System.out.println( newMessage.getPath().toString() + " :: " + queuedMessage.getPath().toString());
 			return false;
 		}
 		
-		if( !permittedMessageTypes.contains( newMessage.getType()))
-		{
-			return false;
-		}
+		// TODO:
+//		if( !permittedMessageTypes.contains( newMessage.getType()))
+//		{
+//			return false;
+//		}
 		
+		//System.out.println( "REPLACING MESSAGE IN QUEUE!");
 		return true;
 	}
 

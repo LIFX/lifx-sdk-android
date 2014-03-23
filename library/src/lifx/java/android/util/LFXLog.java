@@ -4,7 +4,15 @@ public class LFXLog
 {
 	private static boolean error = true;
 	private static boolean warning = true;
-	private static boolean verbose = true;
+	private static boolean verbose = false;
+	
+	public static void Info( String input)
+	{
+		if( error)
+		{
+			System.out.println( "Error: " + input);
+		}
+	}
 	
 	public static void Error( String input)
 	{

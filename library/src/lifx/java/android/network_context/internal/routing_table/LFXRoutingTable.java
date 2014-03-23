@@ -328,7 +328,9 @@ public class LFXRoutingTable
 			{
 				for( LFXSiteID aSiteID : mutableSiteIDs)
 				{
-					returnPaths.add( LFXBinaryPath.getPathWithSiteIDAndTargetID( aSiteID, LFXBinaryTargetID.getBroadcastTargetID()));
+					LFXBinaryPath path = LFXBinaryPath.getPathWithSiteIDAndTargetID( aSiteID, LFXBinaryTargetID.getBroadcastTargetID());
+					// System.out.println( path.toString());
+					returnPaths.add( path);
 				}
 				
 				break;
@@ -410,5 +412,21 @@ public class LFXRoutingTable
 		}
 		
 		return new ArrayList<String>();
+	}
+	
+	public ArrayList<LFXTagMapping> getTagMappingsForSiteIDAndTag( LFXSiteID siteID, String tag)
+	{
+		ArrayList<LFXTagMapping> mappings = new ArrayList<LFXTagMapping>();
+		
+		for( LFXTagMapping aMapping : mutableTagMappings)
+		{
+			if( aMapping.getSiteID().equals( siteID) && aMapping.getTag().equals( tag))	
+			{
+				mappings.add( aMapping);
+			}
+		}
+		
+		return mappings;
+		//return [self.mutableTagMappings lfx_allObjectsWhere:^BOOL(LFXTagMapping *mapping) { return [mapping.siteID isEqual:siteID] && [mapping.tag isEqualToString:tag]; }];
 	}
 }

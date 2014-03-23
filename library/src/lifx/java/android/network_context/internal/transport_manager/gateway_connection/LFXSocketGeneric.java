@@ -2,6 +2,10 @@ package lifx.java.android.network_context.internal.transport_manager.gateway_con
 
 import java.util.ArrayList;
 
+import lifx.java.android.entities.internal.LFXMessage;
+import lifx.java.android.entities.internal.structle.StructleTypes;
+import lifx.java.android.util.LFXByteUtils;
+
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
@@ -46,7 +50,10 @@ public abstract class LFXSocketGeneric
 		
 		public SocketMessage( byte[] message, byte[] ipAddress, int port)
 		{
-			this.message = message;
+			int size = LFXMessage.getSizeFromMessageData( message);
+			byte[] bytes = new byte[size];
+			LFXByteUtils.copyBytesIntoByteArrayUpToLength( bytes, message, size);
+			this.message = bytes;
 			this.ipAddress = ipAddress;
 			this.port = port;
 		}

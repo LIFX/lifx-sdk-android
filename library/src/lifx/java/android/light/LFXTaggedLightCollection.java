@@ -15,11 +15,12 @@ import lifx.java.android.entities.internal.structle.LxProtocolLight.Hsbk;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt16;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt32;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
+import lifx.java.android.light.LFXLight.LFXLightListener;
 import lifx.java.android.network_context.LFXNetworkContext;
 
-public class LFXTaggedLightCollection extends LFXLightCollection
+public class LFXTaggedLightCollection extends LFXLightCollection implements LFXLightListener
 {
-	public static LFXTaggedLightCollection lightCollectionWithNetworkContext( LFXNetworkContext networkContext)
+	public static LFXTaggedLightCollection getLightCollectionWithNetworkContext( LFXNetworkContext networkContext)
 	{
 		LFXTaggedLightCollection collection = new LFXTaggedLightCollection();
 		collection.networkContext = networkContext;
@@ -28,11 +29,6 @@ public class LFXTaggedLightCollection extends LFXLightCollection
 	}
 	
 	private String tag;
-
-	// TODO, these don't currently work
-//	- (void)addLight:(LFXLight *)light;
-//	- (void)removeLight:(LFXLight *)light;
-//	- (void)removeAllLights;
 	
 	private LFXTarget target;
 
@@ -53,14 +49,14 @@ public class LFXTaggedLightCollection extends LFXLightCollection
 
 	public void addLight( LFXLight light)
 	{
-		//LFXLogError(@"Implement me");
+		networkContext.addLightToTaggedLightCollection( light, this);
 	}
 
 	public void removeLight( LFXLight light)
 	{
-		//LFXLogError(@"Implement me");
+		networkContext.removeLightFromTaggedLightCollection( light, this);
 	}
-
+	
 	public void removeAllLights()
 	{
 		for( LFXLight aLight : getLights())
@@ -94,11 +90,6 @@ public class LFXTaggedLightCollection extends LFXLightCollection
 		LxProtocolLight.Set payload = new LxProtocolLight.Set( padding, stream, protocolColor, protocolDuration);
 		lightSet.setPayload( payload);
 		networkContext.sendMessage( lightSet);
-		
-//		LFXMessageLightSet *lightSet = [LFXMessageLightSet messageWithTarget:self.target];
-//		lightSet.payload.color = LXProtocolLightHsbkFromLFXHSBKColor(color);
-//		lightSet.payload.duration = LFXProtocolDurationFromNSTimeInterval(duration);
-//		[self.networkContext sendMessage:lightSet];
 	}
 
 	@Override
@@ -110,10 +101,6 @@ public class LFXTaggedLightCollection extends LFXLightCollection
 		LxProtocolDevice.SetPower payload = new LxProtocolDevice.SetPower( padding, protocolPowerLevel);
 		setPower.setPayload( payload);
 		networkContext.sendMessage( setPower);
-		
-//		LFXMessageDeviceSetPower *setPower = [LFXMessageDeviceSetPower messageWithTarget:self.target];
-//		setPower.payload.level = LFXProtocolPowerLevelFromLFXPowerState(powerState);
-//		[self.networkContext sendMessage:setPower];
 	}
 
 	@Override
@@ -126,5 +113,26 @@ public class LFXTaggedLightCollection extends LFXLightCollection
 	public void setTag( String tag)
 	{
 		this.tag = tag;
+	}
+
+	@Override
+	public void lightDidChangeLabel( LFXLight light, String label)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void lightDidChangeColor( LFXLight light, LFXHSBKColor color)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void lightDidChangePowerState( LFXLight light, LFXPowerState powerState)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

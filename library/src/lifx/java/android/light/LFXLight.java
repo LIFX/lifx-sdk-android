@@ -19,24 +19,34 @@ import lifx.java.android.entities.internal.structle.LxProtocolLight.Hsbk;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt16;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt32;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
+import lifx.java.android.light.LFXLightCollection.LFXLightCollectionListener;
 import lifx.java.android.network_context.LFXNetworkContext;
 
 public class LFXLight extends LFXLightTarget
 {
+	public interface LFXLightListener
+	{
+		public void lightDidChangeLabel( LFXLight light, String label);
+		public void lightDidChangeColor( LFXLight light, LFXHSBKColor color);
+		public void lightDidChangePowerState( LFXLight light, LFXPowerState powerState);
+	}
+	
 	private LFXNetworkContext networkContext;
 
 	private String deviceID;
 
-	private ArrayList<String> tags;									// Contains NSString objects
-	private ArrayList<LFXTaggedLightCollection> taggedCollections;	// Contains LFXTaggedLightCollection objects
+	private ArrayList<String> tags = new ArrayList<String>();													// Contains NSString objects
+	private ArrayList<LFXTaggedLightCollection> taggedCollections = new ArrayList<LFXTaggedLightCollection>();	// Contains LFXTaggedLightCollection objects
 
 	private LFXDeviceReachability reachability;
 
+	private ArrayList<LFXLightListener> listeners = new ArrayList<LFXLightListener>();
+	
 	// Light State
-	private String label;
-	private LFXHSBKColor color;
+	//private String label;
+	//private LFXHSBKColor color;
 	private LFXPowerState powerState;
-	private LFXFuzzyPowerState fuzzyPowerState;
+	//private LFXFuzzyPowerState fuzzyPowerState;
 	
 	private long mostRecentMessageTimestamp;
 	
@@ -178,6 +188,8 @@ public class LFXLight extends LFXLightTarget
 				labelDidChangeTo( payload.getLabel());
 				colorDidChangeTo( LFXBinaryTypes.getLFXHSBKColorFromLXProtocolLightHsbk( payload.getColor()));
 				powerDidChangeTo( LFXBinaryTypes.getLFXPowerStateFromLFXProtocolPowerLevel( payload.getPower()));
+				
+				System.out.println( "Recieved Light State!: " + payload.getLabel());
 				break;
 			}
 			case LX_PROTOCOL_DEVICE_SET_LABEL:
@@ -232,6 +244,11 @@ public class LFXLight extends LFXLightTarget
 		this.powerState = powerState;
 	}
 	
+	public ArrayList<String> getTags()
+	{
+		return tags;
+	}
+	
 	public void setTags( ArrayList<String> tags)
 	{
 		// TODO: notify observers of a change 
@@ -244,11 +261,22 @@ public class LFXLight extends LFXLightTarget
 	{
 		this.taggedCollections = taggedCollections;
 	}
-
-//	@Override
-//	public void setColor( LFXHSBKColor color, long duration)
-//	{
-//		// TODO Auto-generated method stub
-//		
-//	}
+	
+	public void addLightCollectionListener( LFXLight lightCollection, LFXLightListener listener)
+	{
+		if( !listeners.contains( listener))
+		{
+			listeners.add( listener);
+		}
+	} 
+	
+	public void removeAllLightCollectionListeners( LFXLight lightCollection )
+	{
+		listeners.clear();
+	}
+	
+	public void removeLightCollectionListener( LFXLight light, LFXLightListener listener)
+	{
+		listeners.remove( listener);
+	}
 }

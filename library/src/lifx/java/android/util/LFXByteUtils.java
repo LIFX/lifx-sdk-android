@@ -85,6 +85,50 @@ public class LFXByteUtils
 		}
 	}
 	
+	public static void clearByteArray( byte[] bytes)
+	{
+		for( int i = 0; i < bytes.length; i++)
+		{
+			bytes[i] = 0;
+		}
+	}
+	
+	public static byte[] bitwiseOrByteArrays( byte[] arr0, byte[] arr1)
+	{
+		byte[] returnArray = new byte[arr0.length];
+		
+		for( int i = 0; i < arr0.length; i++)
+		{
+			returnArray[i] = (byte)( arr0[i] | arr1[i]);
+		}
+		
+		return returnArray;
+	}
+	
+	public static byte[] bitwiseAndByteArrays( byte[] arr0, byte[] arr1)
+	{
+		byte[] returnArray = new byte[arr0.length];
+		
+		for( int i = 0; i < arr0.length; i++)
+		{
+			returnArray[i] = (byte)( arr0[i] & arr1[i]);
+		}
+		
+		return returnArray;
+	}
+	
+	public static byte[] inverseByteArrayBits( byte[] arr0)
+	{
+		byte[] returnArray = new byte[arr0.length];
+		
+		for( int i = 0; i < arr0.length; i++)
+		{
+			returnArray[i] = (byte) ~arr0[i];
+		}
+		
+		return returnArray;
+	}
+	
 	public static boolean isByteArrayEmpty( byte[] bytes)
 	{
 		for( int i = 0; i < bytes.length; i++)

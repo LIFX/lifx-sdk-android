@@ -2,6 +2,8 @@ package lifx.java.android.network_context.internal.transport_manager;
 
 import java.util.ArrayList;
 
+import android.util.Log;
+
 import lifx.java.android.entities.internal.LFXGatewayDescriptor;
 import lifx.java.android.entities.internal.LFXMessage;
 import lifx.java.android.entities.internal.LFXMessageObservationDescriptor;
@@ -29,10 +31,7 @@ public abstract class LFXTransportManager
 		
 	}
 	
-	public void disconnect()
-	{
-		
-	}
+	public abstract void disconnect();
 
 	private boolean isConnected;
 
@@ -141,6 +140,8 @@ public abstract class LFXTransportManager
 
 	public void sendObserverCallbacksForMessage( LFXMessage message)
 	{
+		//System.out.println( "Sending callbacks for: " + message.getType().toString() + " to " + observationDescriptors.size());
+		
 		for( LFXMessageObservationDescriptor observationDescriptor : (ArrayList<LFXMessageObservationDescriptor>) observationDescriptors.clone())//.clone())
 		{
 			observationDescriptor.getCallback().run( observationDescriptor.getObservingObject(), message);

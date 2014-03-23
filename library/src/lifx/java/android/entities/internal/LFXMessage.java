@@ -1,6 +1,7 @@
 package lifx.java.android.entities.internal;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import lifx.java.android.entities.internal.LFXBinaryTargetID.LFXBinaryTargetType;
 import lifx.java.android.entities.internal.LFXBinaryTargetID.TagField;
@@ -65,7 +66,6 @@ public class LFXMessage
 	private boolean prefersUDPOverTCP = false;
 	
 	// ***************************************************
-
 	private static boolean messageIsAddressable( byte[] data)
 	{
 		boolean addressable = false;
@@ -90,7 +90,7 @@ public class LFXMessage
 		return protocolVersion;
 	}
 	
-	private static int getSizeFromMessageData( byte[] data)
+	public static int getSizeFromMessageData( byte[] data)
 	{
 		int size = StructleTypes.getShortValue( data[0] , data[1]);
 		return size;
@@ -217,6 +217,11 @@ public class LFXMessage
 	
 	public static LFXMessage messageWithMessageData( byte [] data)
 	{
+		if( data == null || data.length == 0)
+		{
+			return null;
+		}
+		
 		byte[] bytes = new byte[data.length];
 		LFXByteUtils.copyBytesIntoByteArray( bytes, data);
 		
@@ -250,8 +255,8 @@ public class LFXMessage
 		
 		message.size = getSizeFromMessageData( bytes);
 		message.protocol = getProtocolFromMessageData( bytes);
-		message.atTime = getAtTimeFromMessageData( data);
-		message.messageType = getTypeFromMessageData( data);
+		message.atTime = getAtTimeFromMessageData( bytes);
+		message.messageType = getTypeFromMessageData( bytes);
 		
 		LFXSiteID site = LFXSiteID.getSiteIDWithData( getSiteIDFromMessageData( bytes));
 		
@@ -340,9 +345,18 @@ public class LFXMessage
 		Class<? extends LxProtocolTypeBase> payloadClass = LxProtocol.typeClassMap.get( messageType);
 		int payloadLength = 0;
 		
+		// PAYLOAD_SIZE
+		
 		try
 		{
-			payloadLength = payloadClass.getField( PAYLOAD_SIZE_FIELD_NAME).getInt( null);
+			Method method = payloadClass.getMethod( "getPayloadSize");
+			Object o = method.invoke( null);
+			
+			if( o != null)
+			{
+				payloadLength = (Integer) o;
+			}
+			//payloadLength = payloadClass.getField( PAYLOAD_SIZE_FIELD_NAME).getInt( null);
 		} 
 		catch( IllegalAccessException e)
 		{
@@ -352,8 +366,14 @@ public class LFXMessage
 		{
 			e.printStackTrace();
 		} 
-		catch( NoSuchFieldException e)
+		catch( NoSuchMethodException e)
 		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch( InvocationTargetException e)
+		{
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -458,8 +478,13 @@ public class LFXMessage
 			data = new byte[BASE_MESSAGE_SIZE];
 		}
 		
-		writeSizeToMessage( (short)size, data);
-		writeProtocolToMessage( (short)protocol, data);
+//		if(size == 0)
+//		{
+//			System.out.println( "Packed Massage with size == 0");
+//		}
+		
+		writeSizeToMessage( (short) data.length, data);
+		writeProtocolToMessage( (short) protocol, data);
 		writeIsAddressableToMessage( true, data);
 		writeAtTimeToMessage( atTime, data);
 		writeTypeToMessage( messageType, data);

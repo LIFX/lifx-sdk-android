@@ -66,17 +66,24 @@ public class LFXBinaryPath implements Cloneable
 		
 		if( !this.targetID.equals( aBinaryPath.targetID))
 		{
+			System.out.println( "TargetIDS are not equal.");
 			return false;
 		}
 		
 		if( !this.siteID.equals( aBinaryPath.siteID))
 		{
+			System.out.println( "SiteIDs are not equal.");
 			return false;
 		}
 		
 		return true;
 	}
 
+	public static LFXBinaryPath getBroadcastBinaryPathWithSiteID( LFXSiteID siteID)
+	{
+		return getPathWithSiteIDAndTargetID( siteID, LFXBinaryTargetID.getBroadcastTargetID());
+	}
+	
 	public int hash()
 	{
 		return this.targetID.hash() ^ this.siteID.hash();

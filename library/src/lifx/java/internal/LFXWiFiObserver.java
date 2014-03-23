@@ -3,6 +3,7 @@ package lifx.java.internal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import android.content.Context;
 
@@ -69,18 +70,24 @@ public class LFXWiFiObserver
 		}
 	}
 	
-	private Runnable wifiPollTimerTask = new Runnable() 
+	private Runnable getWifiPollTimerTask()
 	{
-	    public void run() 
-	    {
-	    	wifiPollingTimerDidFire();
-	    }
-	};
-	
+		Runnable wifiPollTimerTask = new TimerTask() 
+		{
+		    public void run() 
+		    {
+		    	wifiPollingTimerDidFire();
+		    }
+		};
+		
+		return wifiPollTimerTask;
+	}
+		
 	private LFXWiFiObserver()
 	{
 		observationDescriptors = new ArrayList<LFXWiFiObservationDescriptor>();
-		wifiStatePollingTimer = LFXTimerUtils.getTimerTaskWithPeriod( wifiPollTimerTask, 1000); 
+		System.out.println( "Making Wifi Timer task.");
+		wifiStatePollingTimer = LFXTimerUtils.getTimerTaskWithPeriod( getWifiPollTimerTask(), 1000, false); 
 		//wifiStatePollingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(wifiPollingTimerDidFire:) userInfo:nil repeats:YES];
 	}
 
