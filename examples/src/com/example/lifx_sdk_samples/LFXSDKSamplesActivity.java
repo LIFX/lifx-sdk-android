@@ -22,7 +22,7 @@ public class LFXSDKSamplesActivity extends Activity
 {
 	private boolean shouldStopLifxOnPause;
 	private LFXNetworkContext networkContext;
-	private MulticastLock ml;
+	private MulticastLock ml = null;
 	
 	@Override
 	protected void onCreate( Bundle savedInstanceState)
@@ -79,7 +79,11 @@ public class LFXSDKSamplesActivity extends Activity
 		{
 			System.out.println( "Stop LIFX");
 			networkContext.disconnect();
-			ml.release();
+			
+			if( ml != null)
+			{
+				ml.release();
+			}
 		}
 		else
 		{
