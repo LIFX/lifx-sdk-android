@@ -74,7 +74,7 @@ A Network Context (`LFXNetworkContext`) denotes a context within which you will 
 
 ### Lights, Light Collections and Addressing
 
-The underlying LIFX system has three types of internal address: device, tag and broadcast. Device addressing will target an individual device, tag addressing will target all devices that have a particular tag, and broadcast addressing addressing will target all devices. Due to the way the underlying LIFX Binary Protocol works, you'll see much faster responses by targetting a tag (using a Tagged Light Collection) rather than targetting every device within that tag individually. The same goes for targetting all lights - if you want to change the state on all lights, you'll see much faster performance targetting `-[LFXNetworkContext allLightsCollection]` instead of targetting each device individually.
+The underlying LIFX system has three types of internal address: device, tag and broadcast. Device addressing will target an individual device, tag addressing will target all devices that have a particular tag, and broadcast addressing addressing will target all devices. Due to the way the underlying LIFX Binary Protocol works, you'll see much faster responses by targetting a tag (using a Tagged Light Collection) rather than targetting every device within that tag individually. The same goes for targetting all lights - if you want to change the state on all lights, you'll see much faster performance targetting `LFXNetworkContext.getAllLightsCollection()` instead of targetting each device individually.
 
 ### Lights
 
@@ -82,11 +82,11 @@ A `LFXLight` object represents an individual LIFX Light, and there will be only 
 
 ### Light Collections
 
-Light Collections (`LFXLightCollection`) are classes that encapsulate a group of LIFX lights. They can have their light state manipulated in the same way that an individual light can. You can access the lights within a Light Collection through the `.lights` property.
+Light Collections (`LFXLightCollection`) are classes that encapsulate a group of LIFX lights. They can have their light state manipulated in the same way that an individual light can. You can access the lights within a Light Collection through the `.getLights()` method.
 
 ### The All Lights Collection
 
-Each `LFXNetworkContext` has an `.allLightsCollection` property, which is how you get the list of lights. If you want to manipulate every light in the same way (e.g. to turn every light off), you should use the All Lights Collection property directly, instead of targetting each device individually.
+Each `LFXNetworkContext` has an `.getAllLightCollections()` method, which is how you get the list of lights. If you want to manipulate every light in the same way (e.g. to turn every light off), you should use the All Lights Collection property directly, instead of targetting each device individually.
 
 ### Tagged Light Collections
 
