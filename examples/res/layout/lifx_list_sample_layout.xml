@@ -1,3 +1,13 @@
+<!-- 
+
+  lifx_list_sample_layout.xml
+  LIFX
+
+  Created by Jarrod Boyes on 24/03/14.
+  Copyright (c) 2014 LIFX Labs. All rights reserved.
+  
+-->
+
 <LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

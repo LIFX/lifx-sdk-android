@@ -6,6 +6,7 @@ The SDK currently supports Android only. Java support is coming soon.
 
 #### Library Project Installation
 The LIFX SDK will be published as a JAR archive when it is released publicly, but until then you can still use the SDK by cloning the repository and importing it into your project as an Android Library Project.
+Users should note that the library is currently in an early Beta stage, so the API itself could change in the future.
 
 #### Eclipse Sub-Project Installation
 1. Clone the SDK repository into a directory on your local machine.
@@ -15,7 +16,8 @@ The LIFX SDK will be published as a JAR archive when it is released publicly, bu
 
 ### Quick Examples
 
-Initialize the library:
+Initializing the library:
+
 Before using the Library functions, a connection must be established with the LIFX lights that are on the current network.
 First a reference to local network is gathered, then a connection is requested.
 ```java
@@ -55,6 +57,7 @@ for( LFXLight aLight : localNetworkContext.getAllLightsCollection().getLights())
 ```
 
 Disconnect:
+
 When the application is finished with the LIFX bulbs, you will need to signal the Library to end it's connections.
 ```java
 LFXNetworkContext localNetworkContext = LFXClient.getSharedInstance( this).getLocalNetworkContext();
