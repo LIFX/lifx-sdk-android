@@ -1,3 +1,11 @@
+//
+//  LFXSDKTaggedLightCollectionListAdapter.java
+//  LIFX
+//
+//  Created by Jarrod Boyes on 24/03/14.
+//  Copyright (c) 2014 LIFX Labs. All rights reserved.
+//
+
 package com.example.lifx_sdk_samples;
 
 import java.lang.ref.SoftReference;

@@ -1,3 +1,12 @@
+<!-- 
+
+  lifx_main_activity_layout.xml
+  LIFX
+
+  Created by Jarrod Boyes on 24/03/14.
+  Copyright (c) 2014 LIFX Labs. All rights reserved.
+  
+-->
 
 <ScrollView 
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -18,7 +27,7 @@
 	        android:gravity="center"
 	        android:text="Change Label" 
 	        android:onClick="pressedLabelChange"
-	        android:paddingBottom="16dp"/>
+	        android:layout_marginBottom="16dp"/>
 	
 	    <Button
 	        android:layout_width="200dp"
@@ -26,7 +35,7 @@
 	        android:gravity="center"
 	        android:text="Set Random Color" 
 	        android:onClick="pressedRandomColor"
-	        android:paddingBottom="16dp"/>
+	        android:layout_marginBottom="16dp"/>
 	    
 	    <Button
 	        android:layout_width="200dp"

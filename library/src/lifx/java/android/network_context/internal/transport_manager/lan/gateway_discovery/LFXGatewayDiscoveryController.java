@@ -1,3 +1,11 @@
+//
+//  LFXGatewayDiscoveryController.java
+//  LIFX
+//
+//  Created by Jarrod Boyes on 24/03/14.
+//  Copyright (c) 2014 LIFX Labs. All rights reserved.
+//
+
 package lifx.java.android.network_context.internal.transport_manager.lan.gateway_discovery;
 
 import java.util.ArrayList;
@@ -22,6 +30,12 @@ public class LFXGatewayDiscoveryController
 		ACTIVELY_SEARCHING,	// 1 second
 	};
 
+	private LFXGatewayDiscoveryControllerListener listener;
+	private boolean ended = false;
+
+	// This property will change how often DeviceGetPanGateway messages are broadcast
+	private LFXGatewayDiscoveryMode discoveryMode;
+	
 	public static LFXGatewayDiscoveryController getGatewayDiscoveryControllerWithLANTransportManager( LFXLANTransportManager transportManager, LFXGatewayDiscoveryControllerListener listener)
 	{
 		LFXGatewayDiscoveryController discoveryTable = new LFXGatewayDiscoveryController();
@@ -49,11 +63,6 @@ public class LFXGatewayDiscoveryController
 		discoveryTable.configureTimerForDiscoveryMode( discoveryTable.discoveryMode);
 		return discoveryTable;
 	}
-
-	private LFXGatewayDiscoveryControllerListener listener;
-
-	// This property will change how often DeviceGetPanGateway messages are broadcast
-	private LFXGatewayDiscoveryMode discoveryMode;
 
 	public interface LFXGatewayDiscoveryControllerListener
 	{
@@ -175,8 +184,10 @@ public class LFXGatewayDiscoveryController
 
 	public void discoveryTimerDidFire()
 	{
-		System.out.println( "Discover Timer FIred");
-		sendGatewayDiscoveryMessage();
+		if( !ended)
+		{
+			sendGatewayDiscoveryMessage();
+		}
 	}
 	
 	public void shutDown()
@@ -184,7 +195,10 @@ public class LFXGatewayDiscoveryController
 		if( discoveryTimer != null)
 		{
 			discoveryTimer.cancel();
+			discoveryTimer.purge();
 		}
+		
+		ended = true;
 	}
 }
 
