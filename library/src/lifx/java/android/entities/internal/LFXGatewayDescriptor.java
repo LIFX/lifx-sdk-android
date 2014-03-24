@@ -2,10 +2,9 @@ package lifx.java.android.entities.internal;
 
 import lifx.java.android.entities.internal.structle.LxProtocolDevice;
 import lifx.java.android.entities.internal.structle.LxProtocolDevice.Service;
-import lifx.java.android.network_context.internal.transport_manager.gateway_connection.LFXUDPGatewayConnection;
-import lifx.java.internal.LFXWiFiObserver;
+import lifx.java.android.internal.LFXWiFiObserver;
 
-public class LFXGatewayDescriptor implements Cloneable
+public class LFXGatewayDescriptor
 {
 	public static LFXGatewayDescriptor getGatewayDescriptorWithHostPortPathService( String host, int port, LFXBinaryPath path, LxProtocolDevice.Service service)
 	{
@@ -114,15 +113,7 @@ public class LFXGatewayDescriptor implements Cloneable
 		return true;
 	}
 
-	public int hash()
-	{
-		// TODO: 
-		// return host.hash() ^ port ^ path.hash() ^ service;
-		return 0;
-	}
-
-	@Override
-	protected Object clone() throws CloneNotSupportedException
+	public Object clone()
 	{
 		LFXGatewayDescriptor newGatewayDescriptor = new LFXGatewayDescriptor();
 		newGatewayDescriptor.host = this.host;

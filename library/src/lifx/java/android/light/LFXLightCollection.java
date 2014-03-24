@@ -2,8 +2,6 @@ package lifx.java.android.light;
 
 import java.util.ArrayList;
 
-import android.text.GetChars;
-
 import lifx.java.android.entities.LFXHSBKColor;
 import lifx.java.android.entities.LFXLightTarget;
 import lifx.java.android.entities.LFXTypes.LFXFuzzyPowerState;
@@ -11,9 +9,10 @@ import lifx.java.android.entities.LFXTypes.LFXPowerState;
 import lifx.java.android.entities.internal.LFXMessage;
 import lifx.java.android.entities.internal.LFXTarget;
 import lifx.java.android.entities.internal.LFXTarget.LFXTargetType;
+import lifx.java.android.light.LFXLight.LFXLightListener;
 import lifx.java.android.network_context.LFXNetworkContext;
 
-public abstract class LFXLightCollection extends LFXLightTarget 
+public abstract class LFXLightCollection extends LFXLightTarget implements LFXLightListener
 {
 	public interface LFXLightCollectionListener
 	{
@@ -29,19 +28,12 @@ public abstract class LFXLightCollection extends LFXLightTarget
 
 	private ArrayList<LFXLightCollectionListener> listeners = new ArrayList<LFXLightCollectionListener>();
 	
-	protected ArrayList<LFXLight> lights; // LFXLight
-
-	// Convenience method - will return the LFXLight in .lights that matches <deviceID> if it exists
+	protected ArrayList<LFXLight> lights;
 	
 	// Light State
 	public String label;
 	public LFXHSBKColor color;
 	public LFXFuzzyPowerState fuzzyPowerState;
-
-	// Light Control
-	public abstract void setLabel( String label);
-	public abstract void setColor( LFXHSBKColor color);
-	public abstract void setColorOverDuration( LFXHSBKColor color, long overDuration);
 
 	public LFXTarget getTarget()
 	{
@@ -52,11 +44,6 @@ public abstract class LFXLightCollection extends LFXLightTarget
 	{
 		return LFXTargetType.TAG;
 	}
-
-//	- (NSString *)description
-//	{
-//		return [self lfx_descriptionWithPropertyKeys:@[SelfKey(label)]];
-//	}
 
 	public LFXLight getLightWithDeviceID( String deviceID)
 	{
@@ -70,6 +57,7 @@ public abstract class LFXLightCollection extends LFXLightTarget
 		return null;
 	}
 
+	@SuppressWarnings( "unchecked")
 	public ArrayList<LFXLight> getLights()
 	{
 		return (ArrayList<LFXLight>) lights.clone();
@@ -78,7 +66,6 @@ public abstract class LFXLightCollection extends LFXLightTarget
 	// Light State
 	public String getLabel()
 	{
-		//LFXLogImplementMethod();
 		return null;
 	}
 
@@ -158,57 +145,63 @@ public abstract class LFXLightCollection extends LFXLightTarget
 		return lights;
 	}
 	
-//	// Light Control
-//	public void setLabel( String label)
-//	{
-//		//LFXLogImplementMethod();
-//	}
-//
-//	public void setColor( LFXHSBKColor color)
-//	{
-//		//LFXLogImplementMethod();
-//	}
-
-//	public void setColorOverDuration( LFXHSBKColor color, long duration)
-//	{
-//		// LFXLogImplementMethod();
-//	}
-//
-//	public void setPowerState( LFXPowerState powerState)
-//	{
-//		// LFXLogImplementMethod();
-//	}
-
-	// TODO: CHeck out the initialisation, temp moved to LFXTaggedLightCollection
-//	public static LFXLightCollection lightCollectionWithNetworkContext( LFXNetworkContext networkContext)
-//	{
-//		LFXLightCollection collection = new LFXLightCollection();
-//		collection.networkContext = networkContext;
-//		collection.lights = new ArrayList<LFXLight>();
-//		return collection;
-//	}
-
-	public void handleMessage( LFXMessage message)
+	// Light Control
+	public void setLabel( String label)
 	{
-		//LFXLogError( "Light: " + this.toString() + "received message: " + message.toString());
+		for( LFXLightCollectionListener aListener : listeners)
+		{
+			aListener.lightCollectionDidChangeLabel( this, label);
+		}
 	}
+
+	public void setColor( LFXHSBKColor color)
+	{
+	}
+
+	public void setColorOverDuration( LFXHSBKColor color, long duration)
+	{
+		for( LFXLightCollectionListener aListener : listeners)
+		{
+			aListener.lightCollectionDidChangeColor( this, color);
+		}
+	}
+
+	public abstract void handleMessage( LFXMessage message);
 
 	public void addLight( LFXLight light)
 	{
 		lights.add( light);
+		
+		for( LFXLightCollectionListener aListener : listeners)
+		{
+			aListener.lightCollectionDidAddLight( this, light);
+		}
 	}
 
 	public void removeLight( LFXLight light)
 	{
 		lights.remove( light);
+		
+		for( LFXLightCollectionListener aListener : listeners)
+		{
+			aListener.lightCollectionDidRemoveLight( this, light);
+		}
 	}
 
 	public void removeAllLights()
 	{
+		for( LFXLight aLight : lights)
+		{
+			for( LFXLightCollectionListener aListener : listeners)
+			{
+				aListener.lightCollectionDidRemoveLight( this, aLight);
+			}
+		}
+		
 		lights.clear();
 	}
 	
-	public void addLightCollectionListener( LFXLightCollection lightCollection, LFXLightCollectionListener listener)
+	public void addLightCollectionListener( LFXLightCollectionListener listener)
 	{
 		if( !listeners.contains( listener))
 		{
@@ -221,8 +214,26 @@ public abstract class LFXLightCollection extends LFXLightTarget
 		listeners.clear();
 	}
 	
-	public void removeLightCollectionListener( LFXLightCollection lightCollection, LFXLightCollectionListener listener)
+	public void removeLightCollectionListener( LFXLightCollectionListener listener)
 	{
 		listeners.remove( listener);
+	}
+	
+	@Override
+	public void lightDidChangeLabel( LFXLight light, String label)
+	{
+		
+	}
+
+	@Override
+	public void lightDidChangeColor( LFXLight light, LFXHSBKColor color)
+	{
+		
+	}
+
+	@Override
+	public void lightDidChangePowerState( LFXLight light, LFXPowerState powerState)
+	{
+		
 	}
 }

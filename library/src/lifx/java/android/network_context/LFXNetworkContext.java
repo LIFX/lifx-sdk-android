@@ -48,27 +48,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 	private String name;
 	private LFXClient client;
 
-	private boolean isConnected;
-
 	private ArrayList<LFXNetworkContextListener> listeners = new ArrayList<LFXNetworkContextListener>();
-	
-	public void addLightCollectionListener( LFXNetworkContextListener listener)
-	{
-		if( !listeners.contains( listener))
-		{
-			listeners.add( listener);
-		}
-	} 
-	
-	public void removeAllLightCollectionListeners()
-	{
-		listeners.clear();
-	}
-	
-	public void removeLightCollectionListener( LFXNetworkContextListener listener)
-	{
-		listeners.remove( listener);
-	}
 	
 	// Lights
 	private LFXLightCollection allLightsCollection;
@@ -90,14 +70,68 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		return transportManager.isConnected();
 	}
 	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public LFXClient getClient()
+	{
+		return client;
+	}
+	
+	public LFXLightCollection getNewLightCollection()
+	{
+		return newLightsCollection;
+	}
+	
+	public void connect()
+	{
+		transportManager.connect();
+	}
+	
+	public void addNetworkContextListener( LFXNetworkContextListener listener)
+	{
+		if( !listeners.contains( listener))
+		{
+			listeners.add( listener);
+		}
+	} 
+	
+	public void removeAllNetworkContextListeners()
+	{
+		listeners.clear();
+	}
+	
+	public void removeNetworkContextListener( LFXNetworkContextListener listener)
+	{
+		listeners.remove( listener);
+	}
+	
 	public void transportManagerDidConnect( LFXTransportManager transportManager)
 	{
+		for( LFXNetworkContextListener aListener : listeners)
+		{
+			aListener.networkContextDidConnect( this);
+		}
+		
 		scanNetworkForLightStates();
+		
+		if( siteScanTimer != null)
+		{
+			siteScanTimer.cancel();
+			siteScanTimer.purge(); 
+		}
+		
+		siteScanTimer = LFXTimerUtils.getTimerTaskWithPeriod( getSiteScanTimerTask() , LFXSDKConstants.LFX_SITE_SCAN_TIMER_INTERVAL, false); 
 	}
 
 	public void transportManagerDidDisconnect( LFXTransportManager transportManager)
 	{
-		
+		for( LFXNetworkContextListener aListener : listeners)
+		{
+			aListener.networkContextDidDisconnect( this);
+		}
 	}
 
 	public void transportManagerDidConnectToGateway( LFXTransportManager transportManager, LFXGatewayDescriptor gatewayDescriptor)
@@ -110,6 +144,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		
 	}
 
+	@SuppressWarnings( "unchecked")
 	public ArrayList<LFXTaggedLightCollection> getTaggedLightCollections()
 	{
 		return (ArrayList<LFXTaggedLightCollection>) mutableTaggedLightCollections.clone();
@@ -117,7 +152,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 
 	public void siteScanTimerDidFire()
 	{
-		if( !isConnected) 
+		if( !isConnected()) 
 		{
 			return;
 		}
@@ -139,7 +174,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 
 	public void forwardMessageToDeviceWithDeviceID( LFXMessage message, String deviceID)
 	{
-//		LFXLogVerbose(@"Forwarding message to '%@': %@", deviceID, message);
 		LFXLight light = allLightsCollection.getLightWithDeviceID( deviceID);
 		
 		if( light == null)
@@ -151,6 +185,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		light.handleMessage( message);
 	}
 	
+	@SuppressWarnings( "unchecked")
 	private void updateTaggedCollectionsFromRoutingTable()
 	{
 		// Remove any existing tags that don't have a mapping
@@ -190,101 +225,9 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 				{
 					aListener.networkContextDidAddTaggedLightCollection( this, newCollection);
 				}
-				//networkContextObserverProxyDidAddTaggedLightCollection( this, newCollection);
 			}
 		}
 	}
-
-//	public void updateTaggedCollectionsFromRoutingTable()
-//	{
-//		
-//		
-//		
-//		// Remove any existing tags that don't have a mapping
-//		//NSSet *tagsThatHaveMappings = [NSSet setWithArray:self.routingTable.allTags];
-//		Set<String> tagsThatHaveMappings = new HashSet<String>( routingTable.getAllTags());
-//		
-//		for( LFXTaggedLightCollection anExistingTaggedCollection : getTaggedLightCollections())//.clone())
-//		{
-//			if( tagsThatHaveMappings.contains( anExistingTaggedCollection.getTag()) == false)
-//			{
-//				mutableTaggedLightCollections.remove( anExistingTaggedCollection);
-//			}
-//		}
-//		
-//		// Create any non-existant tags that do have a mapping
-//		ArrayList<String> tagsThatHaveACollection = new ArrayList<String>();
-//		
-//		for( LFXTaggedLightCollection aTaggedLightCollection : getTaggedLightCollections())
-//		{
-//			tagsThatHaveACollection.add( aTaggedLightCollection.getTag());
-//		}
-//		
-//		//NSMutableSet *tagsThatHaveACollection = [NSMutableSet setWithArray:[self.taggedLightCollections lfx_arrayByMapping:^id(LFXTaggedLightCollection *collection) { return collection.tag; }]];
-//		for( LFXTagMapping aTagMapping : routingTable.getTagMappings())
-//		{
-//			if( tagsThatHaveACollection.contains( aTagMapping.getTag()) == false)
-//			{
-//				LFXTaggedLightCollection newCollection = LFXTaggedLightCollection.lightCollectionWithNetworkContext( this);
-//				newCollection.setTag( aTagMapping.getTag());
-//				mutableTaggedLightCollections.add( newCollection);
-//				tagsThatHaveACollection.add( aTagMapping.getTag());
-//			}
-//		}
-//	}
-
-//	public void updateDeviceTagMembershipsFromRoutingTable()
-//	{
-//		// For each device, find out what tags it should be in
-//		for( LFXLight aLight : allLightsCollection.getLights())
-//		{
-//			// DeviceMapping tells us the SiteID and TagField of this device
-//			LFXDeviceMapping deviceMapping = routingTable.getDeviceMappingForDeviceID( aLight.getDeviceID());
-//
-//			// Now we need to find the tags corresponding to the SiteID and Tagfield
-//			ArrayList<LFXTaggedLightCollection> oldTaggedCollections = aLight.getTaggedCollections();
-//			
-//			ArrayList<String> tags = new ArrayList<String>();
-//			ArrayList<LFXTaggedLightCollection> taggedCollections = new ArrayList<LFXTaggedLightCollection>();
-//			
-//			ArrayList<TagField> tagFields = LFXBinaryTargetID.enumerateTagField( deviceMapping.getTagField());
-//			
-//			for( TagField aTagField : tagFields)
-//			{
-//				LFXTagMapping tagMapping = routingTable.getTagMappingForSiteIDAndTagField( deviceMapping.getSiteID(), aTagField);
-//				
-//				if( tagMapping == null) 
-//				{
-//					return;
-//				}
-//				
-//				String tag = tagMapping.getTag();
-//				
-//				LFXTaggedLightCollection collection = getTaggedLightCollectionForTag( tag);
-//				
-//				tags.add( tag);
-//				taggedCollections.add( collection);
-//				
-//				if( collection.getLights().contains( aLight) == false)
-//				{
-//					collection.addLight( aLight);
-//				}
-//			}
-//			
-//			aLight.setTags( tags);
-//			aLight.setTaggedCollections( taggedCollections);
-//			
-//			Set<LFXTaggedLightCollection> collectionsThatDeviceNoLongerBelongsTo = new HashSet<LFXTaggedLightCollection>( oldTaggedCollections);
-//			collectionsThatDeviceNoLongerBelongsTo.removeAll( taggedCollections);
-//			
-//			for( LFXTaggedLightCollection aCollection : collectionsThatDeviceNoLongerBelongsTo)
-//			{
-//				aCollection.removeLight( aLight);
-//			}
-//		}
-//		
-//		
-//	}
 	
 	public void updateDeviceTagMembershipsFromRoutingTable()
 	{
@@ -357,20 +300,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		}
 	}
 
-//	public LFXTaggedLightCollection getTaggedLightCollectionForTag( String tag)
-//	{
-//		for( LFXTaggedLightCollection aCollection : mutableTaggedLightCollections)
-//		{
-//			if( aCollection.getTag().equals( tag))
-//			{
-//				return aCollection;
-//			}
-//		}
-//		
-//		return null;
-//		//return [self.taggedLightCollections lfx_firstObjectWhere:^BOOL(LFXTaggedLightCollection *collection) { return [collection.tag isEqualToString:tag]; }];
-//	}
-
 	private Runnable getSiteScanTimerTask()
 	{
 		Runnable siteScanTimerTask = new TimerTask() 
@@ -406,9 +335,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 				networkContext.handleMessage( message);
 			}
 		});
-			
-		System.out.println( "Making Site scan Timer task.");
-		networkContext.siteScanTimer = LFXTimerUtils.getTimerTaskWithPeriod( networkContext.getSiteScanTimerTask() , LFXSDKConstants.LFX_SITE_SCAN_TIMER_INTERVAL, false); 
 
 		return networkContext;
 	}
@@ -423,32 +349,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 	public void logEverything()
 	{
 		System.out.println( "Log Everything Called.");
-//		LFXLogError(@"Network Context: %@", self.name);
-//		LFXLogError(@"... Visible Sites:");
-//		for (LFXSiteID *aSiteID in self.routingTable.siteIDs)
-//		{
-//			LFXLogError(@"... ... %@", aSiteID.stringValue);
-//		}
-//		LFXLogError(@"... Tag Mappings:");
-//		for (LFXTagMapping *aTagMapping in self.routingTable.tagMappings)
-//		{
-//			LFXLogError(@"... ... %@\\%@    tag = '%@'", aTagMapping.siteID.stringValue, [NSString lfx_hexStringWithUInt64:aTagMapping.tagField], aTagMapping.tag);
-//		}
-//		LFXLogError(@"... Device Mappings:");
-//		for (LFXDeviceMapping *aDeviceMapping in self.routingTable.deviceMappings)
-//		{
-//			LFXLogError(@"... ... %@    site = %@ tagField = %@", aDeviceMapping.deviceID, aDeviceMapping.siteID.stringValue, [NSString lfx_hexStringWithUInt64:aDeviceMapping.tagField]);
-//		}
-//		LFXLogError(@"... Lights:");
-//		for (LFXLight *aLight in self.allLightsCollection.lights)
-//		{
-//			LFXLogError(@"... ... %@    color = %@  powerState = %@  label = '%@'  tags = %@", aLight.deviceID, aLight.color.stringValue, NSStringFromLFXPowerState(aLight.powerState), aLight.label, aLight.tags.lfx_singleLineDescription);
-//		}
-//		LFXLogError(@"... Groups:");
-//		for (LFXTaggedLightCollection *aGroup in self.taggedLightCollections)
-//		{
-//			LFXLogError(@"... ... '%@'    fuzzyPowerState = %@  lights = %@", aGroup.tag, NSStringFromLFXFuzzyPowerState(aGroup.fuzzyPowerState), [aGroup.lights lfx_arrayByMapping:^id(LFXLight *light) { return light.deviceID; }].lfx_singleLineDescription);
-//		}
 	}
 
 	public void sendMessage( LFXMessage message)
@@ -463,7 +363,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 				transportManager.sendMessage( newMessage);
 			}
 		}
-		else // For message that have their Binary Path set explicitily (for internal use only)
+		else 			// For message that have their Binary Path set explicitly (for internal use only)
 		{
 			transportManager.sendMessage( message);
 		}
@@ -471,8 +371,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 
 	public void scanNetworkForLightStates()
 	{
-		System.out.println( "Site Scan Timer Fired!");
-		
 		LFXMessage lightGet = LFXMessage.messageWithTypeAndTarget( Type.LX_PROTOCOL_LIGHT_GET, LFXTarget.getBroadcastTarget());
 		sendMessage( lightGet);
 		
@@ -505,16 +403,6 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		LFXTimerUtils.scheduleDelayedTask( task1, 3000);
 	}
 
-	public LFXTaggedLightCollection createTaggedLightCollectionWithTag( String tag)
-	{
-		return null;
-	}
-
-	public LFXLightCollection getNewLightsCollection()
-	{
-		return null;
-	}
-
 	public void claimDevice( LFXLight light)
 	{
 		
@@ -527,7 +415,12 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 	
 	public void disconnect()
 	{
-		// TODO;
+		if( siteScanTimer != null)
+		{
+			siteScanTimer.cancel();
+			siteScanTimer.purge();
+		}
+		
 		transportManager.disconnect();
 	}
 	
@@ -536,7 +429,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		String tag = taggedLightCollection.getTag();
 		LFXDeviceMapping deviceMapping = routingTable.getDeviceMappingForDeviceID( light.getDeviceID());
 		LFXSiteID siteID = deviceMapping.getSiteID();
-		//LFXTagMapping tagMapping = routingTable.getTagMappingsForSiteIDAndTag( siteID, tag).get( 0);
+	
 		ArrayList<LFXTagMapping> mappings = routingTable.getTagMappingsForSiteIDAndTag( siteID, tag);
 		if( mappings.size() == 0)
 		{
@@ -544,10 +437,8 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 			
 			mappings = routingTable.getTagMappingsForSiteIDAndTag( siteID, tag);
 			
-			//tagMapping = mappings.get( 0);
 			if( mappings.size() == 0)
 			{
-				//LFXLog.Error( "Couldn't add device %@ to tag '%@' since it couldn't be created in site %@", light, tag, siteID);
 				return;
 			}
 		}
@@ -558,7 +449,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		{
 			return;
 		}
-		
+
 		LFXMessage setTags = LFXMessage.messageWithTypeAndTarget( Type.LX_PROTOCOL_DEVICE_SET_TAGS, light.getTarget());
 		Object padding = new Object();
 		UInt64 tags = new UInt64( LFXByteUtils.bitwiseOrByteArrays( deviceMapping.getTagField().tagData, tagMapping.getTagField().tagData));
@@ -600,11 +491,11 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		LFXTaggedLightCollection existingTaggedCollectionWithNewTag = getTaggedLightCollectionForTag( newTag);
 		if( existingTaggedCollectionWithNewTag != null)
 		{
-			LFXLog.Info( "Tag " + newTag + " already exists, aborting rename of " + collection.getTag());
+			LFXLog.info( "Tag " + newTag + " already exists, aborting rename of " + collection.getTag());
 			return false;
 		}
 		
-		LFXLog.Info( "Renaming tag " + collection.getTag() + " to " + newTag);
+		LFXLog.info( "Renaming tag " + collection.getTag() + " to " + newTag);
 		for( LFXTagMapping aTagMapping : routingTable.getTagMappingsForTag( collection.getTag()))
 		{
 			LFXMessage setTagLabels = LFXMessage.messageWithTypeAndPath( Type.LX_PROTOCOL_DEVICE_SET_TAG_LABELS, LFXBinaryPath.getBroadcastBinaryPathWithSiteID( aTagMapping.getSiteID()));
@@ -628,7 +519,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 			}
 		}
 		
-		return null;//.lfx_firstObjectWhere:^BOOL(LFXTaggedLightCollection *collection) { return [collection.tag isEqualToString:tag]; }];
+		return null;
 	}
 
 	// Creates a new Tagged Light Collection
@@ -645,6 +536,7 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		{
 			addTagToSiteWithSiteID( tag, aSiteID);
 		}
+		
 		return getTaggedLightCollectionForTag( tag);
 	}
 
@@ -665,11 +557,11 @@ public class LFXNetworkContext implements LFXTransportManagerListener
 		
 		if( LFXByteUtils.isByteArrayEmpty( nextAvailableTagField.tagData))
 		{
-			LFXLog.Error( "Unable to create tag " + tag + " in site " + siteID.getStringValue() + ", no available tag slots");
+			LFXLog.error( "Unable to create tag " + tag + " in site " + siteID.getStringValue() + ", no available tag slots");
 		}
 		else
 		{
-			LFXLog.Error( "Creating tag " + tag + " in site " + siteID.getStringValue() + " with tagField " + LFXByteUtils.byteArrayToHexString( nextAvailableTagField.tagData));			
+			LFXLog.error( "Creating tag " + tag + " in site " + siteID.getStringValue() + " with tagField " + LFXByteUtils.byteArrayToHexString( nextAvailableTagField.tagData));			
 			LFXMessage setTagLabels = LFXMessage.messageWithTypeAndPath( Type.LX_PROTOCOL_DEVICE_SET_TAG_LABELS, LFXBinaryPath.getBroadcastBinaryPathWithSiteID( siteID));
 			Object padding = new Object();
 			UInt64 tags = new UInt64( nextAvailableTagField.tagData);

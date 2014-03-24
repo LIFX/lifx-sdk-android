@@ -2,11 +2,21 @@ package lifx.java.android.util;
 
 public class LFXLog
 {
+	private static boolean info = true;
 	private static boolean error = true;
 	private static boolean warning = true;
 	private static boolean verbose = false;
+	private static boolean debug = false;
 	
-	public static void Info( String input)
+	public static void info( String input)
+	{
+		if( info)
+		{
+			System.out.println( "Error: " + input);
+		}
+	}
+	
+	public static void error( String input)
 	{
 		if( error)
 		{
@@ -14,15 +24,7 @@ public class LFXLog
 		}
 	}
 	
-	public static void Error( String input)
-	{
-		if( error)
-		{
-			System.out.println( "Error: " + input);
-		}
-	}
-	
-	public static void Warn( String input)
+	public static void warn( String input)
 	{
 		if( warning)
 		{
@@ -30,7 +32,7 @@ public class LFXLog
 		}
 	}
 	
-	public static void Verbose( String input)
+	public static void verbose( String input)
 	{
 		if( verbose)
 		{
@@ -38,9 +40,9 @@ public class LFXLog
 		}
 	}
 	
-	public static void Debug( String input)
+	public static void debug( String input)
 	{
-		if( verbose)
+		if( debug)
 		{
 			System.out.println( "Debug: " + input);
 		}
@@ -49,6 +51,7 @@ public class LFXLog
 	public static void LFXMessage( byte[] data)
 	{
 		System.out.println( "Size: " + data.length);
+		
 		for( int i = 0; i < data.length; i++)
 		{
 			System.out.printf( "0x%02X ", data[i]);

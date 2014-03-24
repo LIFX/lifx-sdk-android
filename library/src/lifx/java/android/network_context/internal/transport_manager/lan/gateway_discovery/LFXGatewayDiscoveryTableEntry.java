@@ -5,7 +5,7 @@ import lifx.java.android.entities.internal.LFXGatewayDescriptor;
 public class LFXGatewayDiscoveryTableEntry
 {
 	private LFXGatewayDescriptor gatewayDescriptor;
-	private long lastDiscoveryResponseDate;	// this is the date of the last DeviceStatePanGateway message corresponding to this gateway
+	private long lastDiscoveryResponseDate;
 	
 	public LFXGatewayDescriptor getGatewayDescriptor()
 	{

@@ -7,6 +7,7 @@ package lifx.java.android.entities.internal.structle;
 	Start Of File: LxProtocolDevice.java 
 */
 
+import android.annotation.SuppressLint;
 import java.util.HashMap;
 
 import lifx.java.android.entities.internal.structle.StructleTypes.Bool8;
@@ -22,7 +23,7 @@ import lifx.java.android.entities.internal.structle.StructleTypes.UInt32;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt64;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
 
-
+@SuppressWarnings( "unused")
 public class LxProtocolDevice
 {
 	public enum Service									// Enum Lx::Protocol::Device::Service
@@ -35,7 +36,7 @@ public class LxProtocolDevice
 	public static HashMap<Integer,Service> serviceMap;
 	
 
-  	static
+	static
   	{
   		serviceValueMap = new HashMap<Service,Integer>();
   		serviceMap = new HashMap<Integer,Service>();

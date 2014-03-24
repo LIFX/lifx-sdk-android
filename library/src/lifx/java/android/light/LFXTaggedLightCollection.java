@@ -30,7 +30,7 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 	
 	private String tag;
 	
-	private LFXTarget target;
+	//private LFXTarget target;
 
 	public String getTag()
 	{
@@ -49,11 +49,13 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 
 	public void addLight( LFXLight light)
 	{
+		super.addLight( light);
 		networkContext.addLightToTaggedLightCollection( light, this);
 	}
 
 	public void removeLight( LFXLight light)
 	{
+		super.removeLight( light);
 		networkContext.removeLightFromTaggedLightCollection( light, this);
 	}
 	
@@ -66,22 +68,22 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 	}
 
 	// Getters
-
 	public String getLabel()
 	{
 		return tag;
 	}
 
 	// Setters
-
 	@Override
 	public void setColor( LFXHSBKColor color)
 	{
+		super.setColor( color);
 		setColorOverDuration( color, 250);
 	}
 
 	public void setColorOverDuration( LFXHSBKColor color, long duration)
 	{
+		super.setColorOverDuration( color, duration);
 		LFXMessage lightSet = LFXMessage.messageWithTypeAndTarget( Type.LX_PROTOCOL_LIGHT_SET, getTarget());
 		Object padding = new Object();
 		UInt8 stream = new UInt8( 0);
@@ -95,6 +97,7 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 	@Override
 	public void setPowerState( LFXPowerState powerState)
 	{
+		//super.setPowerState( color, duration);
 		LFXMessage setPower = LFXMessage.messageWithTypeAndTarget( Type.LX_PROTOCOL_DEVICE_SET_POWER, getTarget());
 		Object padding = new Object();
 		UInt16 protocolPowerLevel = LFXBinaryTypes.getLFXProtocolPowerLevelFromLFXPowerState( powerState);
@@ -106,8 +109,7 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 	@Override
 	public void setLabel( String label)
 	{
-		// TODO Auto-generated method stub
-		
+		networkContext.renameTaggedLightCollectionWithNewTag( this, label);
 	}
 	
 	public void setTag( String tag)
@@ -118,21 +120,20 @@ public class LFXTaggedLightCollection extends LFXLightCollection implements LFXL
 	@Override
 	public void lightDidChangeLabel( LFXLight light, String label)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void lightDidChangeColor( LFXLight light, LFXHSBKColor color)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void lightDidChangePowerState( LFXLight light, LFXPowerState powerState)
 	{
-		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void handleMessage( LFXMessage message)
+	{
 	}
 }

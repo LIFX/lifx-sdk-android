@@ -29,7 +29,7 @@ public class LFXAllLightsCollection extends LFXLightCollection
 		return collection;
 	}
 	
-	private LFXTarget target;
+	//private LFXTarget target;
 
 	public LFXTargetType getTargetType()
 	{
@@ -78,5 +78,10 @@ public class LFXAllLightsCollection extends LFXLightCollection
 	public void setLabel( String label)
 	{
 		// DO NOTHING
+	}
+
+	@Override
+	public void handleMessage( LFXMessage message)
+	{
 	}
 }

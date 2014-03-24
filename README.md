@@ -15,6 +15,14 @@ The LIFX SDK will be published as a JAR archive when it is released publicly, bu
 
 ### Quick Examples
 
+Initialize the library:
+Before using the Library functions, a connection must be established with the LIFX lights that are on the current network.
+First a reference to local network is gathered, then a connection is requested.
+```java
+LFXNetworkContext localNetworkContext = LFXClient.getSharedInstance( this).getLocalNetworkContext();
+localNetworkContext.connect();
+```
+
 Turn off all lights:
 ```java
 LFXNetworkContext localNetworkContext = LFXClient.getSharedInstance( this).getLocalNetworkContext();
@@ -44,6 +52,13 @@ for( LFXLight aLight : localNetworkContext.getAllLightsCollection().getLights())
 	LFXHSBKColor color = LFXHSBKColor.getColor( (float)(Math.random() * 360), 1.0f, 1.0f, 3500);
 	aLight.setColor( color);
 }
+```
+
+Disconnect:
+When the application is finished with the LIFX bulbs, you will need to signal the Library to end it's connections.
+```java
+LFXNetworkContext localNetworkContext = LFXClient.getSharedInstance( this).getLocalNetworkContext();
+localNetworkContext.disconnect();
 ```
 
 ---------------

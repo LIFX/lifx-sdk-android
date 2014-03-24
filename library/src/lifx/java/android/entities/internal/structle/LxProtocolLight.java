@@ -7,6 +7,7 @@ package lifx.java.android.entities.internal.structle;
 	Start Of File: LxProtocolLight.java 
 */
 
+import android.annotation.SuppressLint;
 import java.util.HashMap;
 
 import lifx.java.android.entities.internal.structle.StructleTypes.Bool8;
@@ -22,7 +23,8 @@ import lifx.java.android.entities.internal.structle.StructleTypes.UInt32;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt64;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
 
-
+@SuppressLint( "UseSparseArrays")
+@SuppressWarnings( "unused")
 public class LxProtocolLight
 {
 	public enum Waveform									// Enum Lx::Protocol::Light::Waveform

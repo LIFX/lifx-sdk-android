@@ -3,10 +3,15 @@ package lifx.java.android.entities.internal;
 import java.util.ArrayList;
 
 import lifx.java.android.util.LFXByteUtils;
-import lifx.java.android.util.LFXLog;
 
-public class LFXBinaryTargetID implements Cloneable
+public class LFXBinaryTargetID
 {
+	// Canonical representation is a string
+	//
+	// Device: 6 byte, 12 char hex string				(704192abcd12)
+	// Group: uint64 bitfield prefixed with # in hex	(#8 - group 4)
+	// Broadcast: "*"
+	
 	private static final int DEVICE_TARGET_ID_BYTES = 6;
 	private static final int TAG_TARGET_ID_BYTES = 8;
 	private static final int TAG_TARGET_ID_BITS = TAG_TARGET_ID_BYTES * 8;
@@ -47,14 +52,6 @@ public class LFXBinaryTargetID implements Cloneable
 	private TagField groupTagField = new TagField();
 	byte[] deviceBytes;
 	
-	// LFXSiteID instances are immutable
-
-	// Canonical representation is a string
-	//
-	// Device: 6 byte, 12 char hex string				(704192abcd12)
-	// Group: uint64 bitfield prefixed with # in hex	(#8 - group 4)
-	// Broadcast: "*"
-
 	public LFXBinaryTargetType getTargetType()
 	{
 		return targetType;
@@ -93,7 +90,7 @@ public class LFXBinaryTargetID implements Cloneable
 	
 	public static LFXBinaryTargetID getDeviceTargetIDWithString( String string)
 	{
-		byte[] data = LFXByteUtils.hexStringToByteArray( string);		//[NSData lfx_dataWithHexString:string];
+		byte[] data = LFXByteUtils.hexStringToByteArray( string);
 		return getDeviceTargetIDWithData( data);
 	}
 	
@@ -119,32 +116,12 @@ public class LFXBinaryTargetID implements Cloneable
 		return targetID;
 	}
 
-	// Tag Field Enumeration
-	//+ (void)enumerateTagField:(tagField_t)tagField block:(void (^)(tagField_t singularTagField))block;
-	
-//	public static void enumerateTagField( TagField tagField, Runnable r)				// TODO: ?/??????
-//	{
-//		
-//	}
-
-//	+ (LFXBinaryTargetID *)targetIDWithString:(NSString *)stringValue
-//	{
-//		
-//	}
-
 	public static ArrayList<TagField> enumerateTagField( TagField tagField)
 	{
-//		if( tagField == null)
-//		{
-//			return new ArrayL
-//		}
-		
 		ArrayList<TagField> singularTagFields = new ArrayList<TagField>();
 		
 		for( int tagIndex = 0; tagIndex < TAG_TARGET_ID_BITS; tagIndex++)
 		{
-			//LFXLog.Debug( "TagField = " + tagField);
-			
 			if( LFXByteUtils.isBitSet( tagField.tagData, tagIndex))
 			{
 				TagField tempTagField = new TagField();
@@ -190,31 +167,10 @@ public class LFXBinaryTargetID implements Cloneable
 		return targetType;
 	}
 
-//	public static LFXBinaryTargetID deviceTargetIDWithData:(NSData *)data
-//	{
-//		
-//	}
-
-//	+ (LFXBinaryTargetID *)deviceTargetIDWithString:(NSString *)string
-//	{
-//		
-//	}
-
-//	+ (LFXBinaryTargetID *)groupTargetIDWithTagField:(tagField_t)tagField
-//	{
-//		
-//	}
-
 	public TagField getGroupTagField()
 	{
 		return groupTagField;
 	}
-
-
-//	+ (LFXBinaryTargetID *)broadcastTargetID
-//	{
-//		
-//	}
 
 	public ArrayList<LFXBinaryTargetID> getIndividualGroupTargetIDs()
 	{
@@ -250,16 +206,6 @@ public class LFXBinaryTargetID implements Cloneable
 		{
 			return LFXByteUtils.byteArrayToHexString( this.groupTagField.tagData);
 		}
-	}
-
-	public int hash()
-	{
-		// TODO: 
-//		NSUInteger hash = 0;
-//		hash ^= _groupTagField;	// This may be crappy in a 32-bit runtime - the top 32 bits will be lost
-//		hash ^= _deviceBytes.hash;
-		int i = 0;
-		return i;
 	}
 
 	public boolean equal( LFXBinaryTargetID aTargetID)
@@ -300,12 +246,5 @@ public class LFXBinaryTargetID implements Cloneable
 		}
 		
 		return true;
-	}
-	
-	@Override
-	protected Object clone() throws CloneNotSupportedException
-	{
-		// TODO Auto-generated method stub
-		return super.clone();
 	}
 }

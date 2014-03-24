@@ -23,6 +23,7 @@ import lifx.java.android.entities.internal.structle.StructleTypes.UInt64;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
 
 
+@SuppressWarnings( "unused")
 public class LxProtocol
 {
 	public enum Type									// Enum Lx::Protocol::Type

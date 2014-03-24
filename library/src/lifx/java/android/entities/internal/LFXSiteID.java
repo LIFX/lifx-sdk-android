@@ -2,7 +2,7 @@ package lifx.java.android.entities.internal;
 
 import lifx.java.android.util.LFXByteUtils;
 
-public class LFXSiteID implements Cloneable
+public class LFXSiteID
 {
 	private static final int LFX_SITE_ID_NUMBER_OF_BYTES = 6;
 	
@@ -34,12 +34,6 @@ public class LFXSiteID implements Cloneable
 	// The LIFX Protocol uses 6-bytes to represent a Site ID
 	public static LFXSiteID getSiteIDWithData( byte[] data)
 	{
-		if( data.length != LFX_SITE_ID_NUMBER_OF_BYTES)
-		{
-			// TODO:
-			//LFXLogError( "Site ID doesn't have " + LFX_SITE_ID_NUMBER_OF_BYTES + " bytes: " + ByteUtils.byteArrayToHexString( data));
-		}
-		
 		LFXSiteID siteID = new LFXSiteID();
 		LFXByteUtils.copyBytesIntoByteArray( siteID.data, data);
 		return siteID;
@@ -73,14 +67,6 @@ public class LFXSiteID implements Cloneable
 		return getDebugStringValue();
 	}
 
-	public int hash()
-	{
-		// TODO: 
-		
-		int hash = 0;
-		return hash;
-	}
-
 	public boolean equals( LFXSiteID aSiteID)
 	{
 		if( aSiteID == null)
@@ -97,7 +83,7 @@ public class LFXSiteID implements Cloneable
 	}
 
 	@Override
-	protected Object clone() throws CloneNotSupportedException
+	public Object clone()
 	{	
 		return getSiteIDWithData( data);
 	}

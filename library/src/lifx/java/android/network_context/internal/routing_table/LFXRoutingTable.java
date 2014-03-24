@@ -14,58 +14,12 @@ import lifx.java.android.entities.internal.LFXBinaryTargetID.TagField;
 import lifx.java.android.entities.internal.structle.LxProtocolDevice;
 import lifx.java.android.entities.internal.structle.LxProtocolLight;
 import lifx.java.android.entities.internal.structle.LxProtocol.Type;
-import lifx.java.android.entities.internal.structle.StructleTypes.LxProtocolTypeBase;
 
 public class LFXRoutingTable
 {
-//	private ArrayList deviceMappings;
-//	private ArrayList tagMappings;
-//	private ArrayList siteIDs;
-
-//	// Updating
-//	public void updateMappingsFromMessage( LFXMessage message)
-//	{
-//		
-//	}
-//
-//	// Removes all mappings + siteIDs
-//	public void resetRoutingTable()
-//	{
-//		
-//	}
-//
-//	// Querying
-//	public ArrayList getAllTags()	// NSString objects
-//	{
-//		
-//	}
-
-//	public LFXDeviceMapping getDeviceMappingForDeviceID( String deviceID);
-//	public ArrayList getDeviceMappingsForSiteID( LFXSiteID siteID);									// LFXDeviceMapping objects
-//	public ArrayList getDeviceMappingsForSiteIDTagField( LFXSiteID siteID, TagField tagField);		// LFXDeviceMapping objects
-//
-//	public LFXTagMapping getTagMappingForSiteIDTagField( LFXSiteID siteID, TagField tagField);
-//	public ArrayList getTagMappingsForTag( String tag);												// LFXTagMapping objects
-
-	// Routing
-
-//	// LFXTarget -> LFXBinaryPath (for outgoing messages)
-//	public ArrayList getBinaryPathsForTarget( LFXTarget target);	// LFXBinaryPath objects
-//
-//	// LFXBinaryPath -> DeviceID (NSString) (for incoming messages)
-//	public ArrayList getDeviceIDsForBinaryPath( LFXBinaryPath binaryPath);
-	
 	private HashMap<String,LFXDeviceMapping> mutableDeviceMappingsByDeviceID;
 	private ArrayList<LFXTagMapping> mutableTagMappings;
 	private ArrayList<LFXSiteID> mutableSiteIDs;	// Could be derived from DeviceMappings, but is cached separately for performance reasons
-
-
-//	public void updateSiteID( LFXSiteID siteID);
-//
-//	public void updateDeviceMappingWithDeviceIDSiteID( String deviceID, LFXSiteID siteID);
-//	public void updateDeviceMappingWithDeviceIDSiteIDTagField( String deviceID, LFXSiteID siteID, TagField tagField);
-//
-//	public void updateTagMappingWithTagSiteIDTagField( String tag, LFXSiteID siteID, TagField tagField);
 
 	public LFXRoutingTable()
 	{
@@ -116,8 +70,6 @@ public class LFXRoutingTable
 			tagField.tagData = payload.getTags().getBytes();
 			
 			updateDeviceMappingWithDeviceID( path, siteID, tagField);
-			
-			//[self updateDeviceMappingWithDeviceID:message.path.targetID.stringValue siteID:message.path.siteID tagField:CastObject(LFXMessageLightState, message).payload.tags];
 		}
 		
 		if( message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAGS)
@@ -130,8 +82,6 @@ public class LFXRoutingTable
 			tagField.tagData = payload.getTags().getBytes();
 			
 			updateDeviceMappingWithDeviceID( path, siteID, tagField);
-			
-			//[self updateDeviceMappingWithDeviceID:message.path.targetID.stringValue siteID:message.path.siteID tagField:CastObject(LFXMessageDeviceStateTags, message).payload.tags];
 		}
 		
 		if( message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAG_LABELS)
@@ -148,13 +98,6 @@ public class LFXRoutingTable
 			{
 				updateTagMappingWithTag( payload.getLabel(), siteID, aTagField);
 			}
-			
-			//LFXMessageDeviceStateTagLabels *stateTagLabels = CastObject(LFXMessageDeviceStateTagLabels, message);
-			
-//			[LFXBinaryTargetID enumerateTagField:stateTagLabels.payload.tags block:^(tagField_t singularTagField) 
-//			{
-//				[self updateTagMappingWithTag:stateTagLabels.payload.label siteID:message.path.siteID tagField:singularTagField];
-//			}];
 		}
 	}
 
@@ -244,10 +187,9 @@ public class LFXRoutingTable
 		}
 		
 		return allTags;
-		
-		//return [self.mutableTagMappings lfx_arrayByMapping:^id(LFXTagMapping *mapping) { return mapping.tag; }];
 	}
 
+	@SuppressWarnings( "unchecked")
 	public ArrayList<LFXSiteID> getAllSiteIDs()
 	{
 		return (ArrayList<LFXSiteID>) mutableSiteIDs.clone();
@@ -255,7 +197,7 @@ public class LFXRoutingTable
 
 	public LFXDeviceMapping getDeviceMappingForDeviceID( String deviceID)
 	{
-		return mutableDeviceMappingsByDeviceID.get( deviceID);	//[self.mutableDeviceMappingsByDeviceID objectForKey:deviceID];
+		return mutableDeviceMappingsByDeviceID.get( deviceID);
 	}
 
 	public ArrayList<LFXDeviceMapping> getDeviceMappingsForSiteID( LFXSiteID siteID)
@@ -329,7 +271,6 @@ public class LFXRoutingTable
 				for( LFXSiteID aSiteID : mutableSiteIDs)
 				{
 					LFXBinaryPath path = LFXBinaryPath.getPathWithSiteIDAndTargetID( aSiteID, LFXBinaryTargetID.getBroadcastTargetID());
-					// System.out.println( path.toString());
 					returnPaths.add( path);
 				}
 				
@@ -354,10 +295,6 @@ public class LFXRoutingTable
 					returnPaths.add( binaryPath);
 					// TODO: decide if to // break; here
 				}
-				
-//				return [self.mutableSiteIDs lfx_arrayByMapping:^id(LFXSiteID *siteID) {
-//					return [LFXBinaryPath pathWithSiteID:siteID targetID:[LFXBinaryTargetID deviceTargetIDWithString:target.deviceID]];
-//				}];
 			}
 			case TAG:
 			{
@@ -388,7 +325,6 @@ public class LFXRoutingTable
 				}
 				
 				return deviceIds;
-				//return [[self deviceMappingsForSiteID:binaryPath.siteID] lfx_arrayByMapping:^id(LFXDeviceMapping *mapping) { return mapping.deviceID; }];
 			}
 			case DEVICE:
 			{
@@ -405,9 +341,7 @@ public class LFXRoutingTable
 					deviceIds.add( aDeviceMapping.getDeviceId());
 				}
 				
-				return deviceIds;
-				
-				//return [[self deviceMappingsForSiteID:binaryPath.siteID tagField:binaryPath.targetID.groupTagField] lfx_arrayByMapping:^id(LFXDeviceMapping *mapping) { return mapping.deviceID; }];
+				return deviceIds;				
 			}
 		}
 		
@@ -427,6 +361,5 @@ public class LFXRoutingTable
 		}
 		
 		return mappings;
-		//return [self.mutableTagMappings lfx_allObjectsWhere:^BOOL(LFXTagMapping *mapping) { return [mapping.siteID isEqual:siteID] && [mapping.tag isEqualToString:tag]; }];
 	}
 }

@@ -1,9 +1,6 @@
 package lifx.java.android.network_context.internal.transport_manager;
 
 import java.util.ArrayList;
-
-import android.util.Log;
-
 import lifx.java.android.entities.internal.LFXGatewayDescriptor;
 import lifx.java.android.entities.internal.LFXMessage;
 import lifx.java.android.entities.internal.LFXMessageObservationDescriptor;
@@ -26,16 +23,11 @@ public abstract class LFXTransportManager
 	protected LFXTransportManagerListener listener;
 
 	// May have no meaning for some Network Contexts
-	public void connect()
-	{
-		
-	}
+	public abstract void connect();
 	
 	public abstract void disconnect();
 
 	private boolean isConnected;
-
-	// Should be overriden by subclasses.
 
 	// After sending, -sendObserverCallbacksForMessage: should be called with the message.
 	public abstract void sendMessage( LFXMessage message);
@@ -99,9 +91,6 @@ public abstract class LFXTransportManager
 		}
 		
 		this.isConnected = isConnected;
-		
-		// TODO: not sure exactly what this does
-		// [[NSNotificationCenter defaultCenter] postNotificationName:LFXNetworkContextConnectionStateDidChangeNotificationName object:self.networkContext];
 	}
 
 	// Token Based subscriptions
@@ -127,9 +116,10 @@ public abstract class LFXTransportManager
 		observationDescriptors.add( observationDescriptor);
 	}
 
+	@SuppressWarnings( "unchecked")
 	public void removeMessageObserversForObject( Object anObserverObject)
 	{
-		for( LFXMessageObservationDescriptor observationDescriptor : (ArrayList<LFXMessageObservationDescriptor>) observationDescriptors.clone())//.clone())
+		for( LFXMessageObservationDescriptor observationDescriptor : (ArrayList<LFXMessageObservationDescriptor>) observationDescriptors.clone())
 		{
 			if( observationDescriptor.observingObjectWasEqualTo( anObserverObject))
 			{
@@ -138,11 +128,10 @@ public abstract class LFXTransportManager
 		}
 	}
 
+	@SuppressWarnings( "unchecked")
 	public void sendObserverCallbacksForMessage( LFXMessage message)
 	{
-		//System.out.println( "Sending callbacks for: " + message.getType().toString() + " to " + observationDescriptors.size());
-		
-		for( LFXMessageObservationDescriptor observationDescriptor : (ArrayList<LFXMessageObservationDescriptor>) observationDescriptors.clone())//.clone())
+		for( LFXMessageObservationDescriptor observationDescriptor : (ArrayList<LFXMessageObservationDescriptor>) observationDescriptors.clone())
 		{
 			observationDescriptor.getCallback().run( observationDescriptor.getObservingObject(), message);
 		}
@@ -151,5 +140,10 @@ public abstract class LFXTransportManager
 	public ArrayList<LFXSiteID> getVisibleSiteIDs()
 	{
 		return visibleSiteIDs;
+	}
+	
+	public LFXNetworkContext getNetworkContext()
+	{
+		return networkContext;
 	}
 }

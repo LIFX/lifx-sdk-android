@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import lifx.java.android.constant.LFXSDKConstants;
 import lifx.java.android.entities.internal.LFXBinaryPath;
 import lifx.java.android.entities.internal.LFXGatewayDescriptor;
 import lifx.java.android.entities.internal.LFXMessage;
@@ -66,24 +65,7 @@ public class LFXGatewayDiscoveryController
 	private LFXLANTransportManager transportManager;
 	private ArrayList<LFXGatewayDiscoveryTableEntry> table;
 
-//	@implementation LFXGatewayDiscoveryController
-//
-//	+ (LFXGatewayDiscoveryController *)gatewayDiscoveryControllerWithLANTransportManager:(LFXLANTransportManager *)transportManager delegate:(id <LFXGatewayDiscoveryControllerDelegate>)delegate
-//	{
-//		LFXGatewayDiscoveryController *discoveryTable = [LFXGatewayDiscoveryController new];
-//		discoveryTable->_table = [NSMutableArray new];
-//		discoveryTable->_transportManager = transportManager;
-//		discoveryTable->_delegate = delegate;
-//		MAKE_WEAK_REF(discoveryTable, weakDiscoveryTable);
-//		[discoveryTable.transportManager addMessageObserverWithCallback:^(LFXMessage *message) {
-//			if (message.messageType != LX_PROTOCOL_DEVICE_STATE_PAN_GATEWAY) return;
-//			[weakDiscoveryTable handleStatePANGatewayMessage:(LFXMessageDeviceStatePanGateway *)message];
-//		}];
-//		discoveryTable->_discoveryMode = LFXGatewayDiscoveryModeNormal;
-//		[discoveryTable configureTimerForDiscoveryMode:discoveryTable.discoveryMode];
-//		return discoveryTable;
-//	}
-
+	@SuppressWarnings( { "unchecked", "unused" })
 	private ArrayList<LFXGatewayDiscoveryTableEntry> getAllGatewayDiscoveryTableEntries()
 	{
 		return (ArrayList<LFXGatewayDiscoveryTableEntry>) table.clone();
@@ -94,35 +76,8 @@ public class LFXGatewayDiscoveryController
 		table.clear();
 	}
 
-	public String diagnosticTextDump()
-	{
-//		NSMutableString *string = [NSMutableString new];
-//		
-//		for (LFXGatewayDiscoveryTableEntry *anEntry in self.table)
-//		{
-//			NSTimeInterval secondsAgo = [anEntry.lastDiscoveryResponseDate lfx_timeIntervalUpToNow];
-//			NSString *timeAgo;
-//			if (secondsAgo < 60) {
-//				timeAgo = [NSString stringWithFormat:@"%0.0fs", secondsAgo];
-//			}
-//			else if (secondsAgo < 60 * 60) {
-//				timeAgo = [NSString stringWithFormat:@"%0.0fm", secondsAgo/60.0];
-//			}
-//			else {
-//				timeAgo = @">1h";
-//			}
-//			[string appendFormat:@"%@:%hu %@ %@ (%@)\n", anEntry.gatewayDescriptor.host, anEntry.gatewayDescriptor.port, anEntry.gatewayDescriptor.protocolString, anEntry.gatewayDescriptor.path.debugStringValue, timeAgo];
-//		}
-		
-		String value = "";
-		
-		return value;
-	}
-
 	public void handleStatePANGatewayMessage( LFXMessage statePanGateway)
 	{
-		//LFXGatewayDescriptor *gatewayDescriptor = [LFXGatewayDescriptor gatewayDescriptorWithHost:statePanGateway.sourceNetworkHost port:statePanGateway.payload.port path:statePanGateway.path service:statePanGateway.payload.service];
-		
 		LxProtocolDevice.StatePanGateway statePanGatewayPayload = (LxProtocolDevice.StatePanGateway) statePanGateway.getPayload();
 		
 		String host = statePanGateway.getSourceNetworkHost();
@@ -136,11 +91,9 @@ public class LFXGatewayDiscoveryController
 			return;
 		}
 		
-		LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService( host, port, path, service);// port:statePanGateway.payload.port path:statePanGateway.path service:statePanGateway.payload.service];
+		LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService( host, port, path, service);
 		
 		LFXGatewayDiscoveryTableEntry tableEntry = null;
-		
-		//table.lfx_firstObjectWhere:^BOOL(LFXGatewayDiscoveryTableEntry *entry) { return [entry.gatewayDescriptor isEqual:gatewayDescriptor]; }];
 		
 		for( LFXGatewayDiscoveryTableEntry anEntry : table)
 		{
@@ -218,7 +171,6 @@ public class LFXGatewayDiscoveryController
 
 		System.out.println( "Making Discovery Timer task. Period: " + duration);
 		discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod( getDiscoverTimerTask(), duration, false);
-		//discoveryTimer = [NSTimer scheduledTimerWithTimeInterval:duration target:self selector:@selector(discoveryTimerDidFire:) userInfo:nil repeats:YES];
 	}
 
 	public void discoveryTimerDidFire()

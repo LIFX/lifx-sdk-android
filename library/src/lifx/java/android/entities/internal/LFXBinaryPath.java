@@ -2,7 +2,7 @@ package lifx.java.android.entities.internal;
 
 import java.util.StringTokenizer;
 
-public class LFXBinaryPath implements Cloneable
+public class LFXBinaryPath
 {
 	public static LFXBinaryPath getPathWithString( String stringPath)
 	{
@@ -12,7 +12,6 @@ public class LFXBinaryPath implements Cloneable
 		
 		if( tokens != 2)
 		{
-			// LFXLogError( "Error: Path doesn't contain 2 elements separated by a '/': " + stringPath);
 			return null;
 		}
 		
@@ -66,13 +65,11 @@ public class LFXBinaryPath implements Cloneable
 		
 		if( !this.targetID.equals( aBinaryPath.targetID))
 		{
-			System.out.println( "TargetIDS are not equal.");
 			return false;
 		}
 		
 		if( !this.siteID.equals( aBinaryPath.siteID))
 		{
-			System.out.println( "SiteIDs are not equal.");
 			return false;
 		}
 		
@@ -84,13 +81,7 @@ public class LFXBinaryPath implements Cloneable
 		return getPathWithSiteIDAndTargetID( siteID, LFXBinaryTargetID.getBroadcastTargetID());
 	}
 	
-	public int hash()
-	{
-		return this.targetID.hash() ^ this.siteID.hash();
-	}
-	
-	@Override
-	protected Object clone() throws CloneNotSupportedException
+	public Object clone()
 	{
 		LFXBinaryPath newPath = new LFXBinaryPath();
 		newPath.siteID = this.siteID;

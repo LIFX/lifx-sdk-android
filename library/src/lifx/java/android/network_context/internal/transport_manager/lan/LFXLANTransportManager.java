@@ -28,10 +28,14 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 	
 	private LFXGatewayDiscoveryController gatewayDiscoveryController;
 
-	private HashMap<LFXGatewayDescriptor,LFXGatewayConnection> gatewayConnections;	// Keyed by .gatewayDescriptor
+	private HashMap<LFXGatewayDescriptor,LFXGatewayConnection> gatewayConnections;
 
+	private boolean enabled = true;
+	
 	public void disconnect()
 	{
+		enabled = false;
+		
 		broadcastUDPConnection.disconnect();
 		peerToPeerUDPConnection.disconnect();
 		gatewayDiscoveryController.shutDown();
@@ -47,20 +51,25 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 	public LFXLANTransportManager()
 	{
 		super();
-		LFXLog.Debug( "LFXLAN Initializer");
+		LFXLog.debug( "LFXLAN Initializer");
+	}
+
+	public void connect()
+	{
+		enabled = true;
 		
 		gatewayDiscoveryController = LFXGatewayDiscoveryController.getGatewayDiscoveryControllerWithLANTransportManager( this, this);
 		gatewayConnections = new HashMap<LFXGatewayDescriptor,LFXGatewayConnection>();
 		
-		LFXLog.Debug( "Setup UDP Connections");
+		LFXLog.debug( "Setup UDP Connections");
 		setupBroadcastUDPConnection();
 		setupPeerToPeerUDPConnection();
 			
-		LFXLog.Debug( "Start Discovery");
+		LFXLog.debug( "Start Discovery");
 		gatewayDiscoveryController.setDiscoveryMode( LFXGatewayDiscoveryMode.ACTIVELY_SEARCHING);
 		gatewayDiscoveryController.sendGatewayDiscoveryMessage();
 	}
-
+	
 	public void setupBroadcastUDPConnection()
 	{
 		broadcastUDPConnection = LFXGatewayConnection.getGatewayConnectionWithGatewayDescriptor( LFXGatewayDescriptor.getBroadcastGatewayDescriptor(), this);
@@ -75,36 +84,25 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 
 	public void connectionStatesDidChange()
 	{
-		System.out.println( "Connection State did change called.");
-		
-		boolean newIsConnected = false;
-		for( LFXGatewayConnection aGatewayConnection : gatewayConnections.values())
+		if( enabled)
 		{
-			System.out.println( aGatewayConnection.getGatewayDescriptor().toString() + " : " +  aGatewayConnection.getConnectionState().toString());
+			System.out.println( "Connection State did change called.");
 			
-			if( aGatewayConnection.getConnectionState() == LFXGatewayConnectionState.CONNECTED)
+			boolean newIsConnected = false;
+			for( LFXGatewayConnection aGatewayConnection : gatewayConnections.values())
 			{
-				newIsConnected = true;
+				System.out.println( aGatewayConnection.getGatewayDescriptor().toString() + " : " +  aGatewayConnection.getConnectionState().toString());
+				
+				if( aGatewayConnection.getConnectionState() == LFXGatewayConnectionState.CONNECTED)
+				{
+					newIsConnected = true;
+				}
 			}
+			
+			setIsConnected( newIsConnected);
+			
+			gatewayDiscoveryController.setDiscoveryMode( isConnected() ? LFXGatewayDiscoveryMode.NORMAL : LFXGatewayDiscoveryMode.ACTIVELY_SEARCHING);
 		}
-		
-		setIsConnected( newIsConnected);
-		
-		gatewayDiscoveryController.setDiscoveryMode( isConnected() ? LFXGatewayDiscoveryMode.NORMAL : LFXGatewayDiscoveryMode.ACTIVELY_SEARCHING);
-		
-		logConnectionStates();
-	}
-
-	private void logConnectionStates()
-	{
-//		LFXLogError(@"Current Connections:");
-//		LFXLogError(@"... Broadcast UDP: %@", self.broadcastUDPConnection);
-//		LFXLogError(@"... Peer to Peer UDP: %@", self.peerToPeerUDPConnection);
-//		LFXLogError(@"... Gateway Connections:");
-//		for (LFXGatewayConnection *aConnection in self.gatewayConnections.allValues)
-//		{
-//			LFXLogError(@"... ... %@", aConnection);
-//		}
 	}
 
 	public void sendMessage( LFXMessage message)
@@ -200,16 +198,6 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 
 	public void sendBroadcastUDPMessage( LFXMessage message)
 	{
-//		if( message == null)
-//		{
-//			System.out.println( "Message == null");
-//		}
-//		
-//		if( broadcastUDPConnection == null)
-//		{
-//			System.out.println( "broadcastUDPConnection == null");
-//		}
-		
 		sendMessageOnConnection( message, broadcastUDPConnection);
 		sendObserverCallbacksForMessage( message);
 	}
@@ -235,8 +223,6 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 		}
 		
 		return descriptors;
-		
-		//return [self.gatewayConnections.allKeys lfx_allObjectsWhere:^BOOL(LFXGatewayDescriptor *gateway) { return [gateway.path.siteID isEqual:siteID]; }];
 	}
 
 	public Set<String> getGatewayHostsForSiteID( LFXSiteID siteID)
@@ -249,8 +235,6 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 		}
 		
 		return new HashSet<String>( hosts);
-		
-		//return [[[self gatewayDescriptorsForSiteID:siteID] lfx_arrayByMapping:^id(LFXGatewayDescriptor *gateway) { return gateway.host; }] lfx_set];
 	}
 
 	public Set<String> getGatewayHosts()
@@ -263,7 +247,6 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 		}
 		
 		return new HashSet<String>( hosts);
-		//return [[self.gatewayConnections.allKeys lfx_arrayByMapping:^id(LFXGatewayDescriptor *gateway) { return gateway.host; }] lfx_set];
 	}
 
 	public LFXGatewayConnection getGatewayConnectionForHost( String host, Service service)
@@ -278,55 +261,53 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 		}
 		
 		return null;
-		
-		//return [self.gatewayConnections.allValues lfx_firstObjectWhere:^BOOL(LFXGatewayConnection *connection) { return connection.gatewayDescriptor.service == service && [connection.gatewayDescriptor.host isEqualToString:host]; }];
 	}
-
-	//#pragma mark - LFXGatewayConnectionDelegate
 
 	public void gatewayConnectionDidConnect( LFXGatewayConnection connection)
 	{
-		//LFXLogInfo(@"Connection %@ did connect", connection);
 		connectionStatesDidChange();
 		listener.transportManagerDidConnectToGateway( this, connection.getGatewayDescriptor());
 	}
 
 	public void gatewayConnectionDidDisconnectWithError( LFXGatewayConnection connection, String error)
 	{
-		//LFXLogInfo(@"Connection %@ did disconnect: %@", connection, error.localizedDescription);
 		if( connection == broadcastUDPConnection)
 		{
 			broadcastUDPConnection.disconnect();
 			broadcastUDPConnection.setListener( null);
-			// [self performSelector:@selector(setupBroadcastUDPConnection) withObject:nil afterDelay:1.0];
 			
-			Runnable task = new Runnable()
+			if( enabled)
 			{
-				@Override
-				public void run()
+				Runnable task = new Runnable()
 				{
-					setupBroadcastUDPConnection();
-				}
-			};
-			
-			LFXTimerUtils.scheduleDelayedTask( task, 1000);
+					@Override
+					public void run()
+					{
+						setupBroadcastUDPConnection();
+					}
+				};
+				
+				LFXTimerUtils.scheduleDelayedTask( task, 1000);
+			}
 		}
 		else if( connection == peerToPeerUDPConnection)
 		{
 			peerToPeerUDPConnection.disconnect();
 			peerToPeerUDPConnection.setListener( null);
-			// [self performSelector:@selector(setupPeerToPeerUDPConnection) withObject:nil afterDelay:3.0];
 			
-			Runnable task = new Runnable()
+			if( enabled)
 			{
-				@Override
-				public void run()
+				Runnable task = new Runnable()
 				{
-					setupPeerToPeerUDPConnection();
-				}
-			};
+					@Override
+					public void run()
+					{
+						setupPeerToPeerUDPConnection();
+					}
+				};
 			
-			LFXTimerUtils.scheduleDelayedTask( task, 1000);
+				LFXTimerUtils.scheduleDelayedTask( task, 3000);
+			}
 		}
 		else
 		{
@@ -348,13 +329,10 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 	
 	public void gatewayDiscoveryControllerDidUpdateEntry( LFXGatewayDiscoveryController table, LFXGatewayDiscoveryTableEntry tableEntry, boolean entryIsNew)
 	{		
-		//LFXLog.Verbose( "Received %@ gateway discovery entry: %@", entryIsNew ? @"a new" : @"an updated", tableEntry);
-		
 		LFXGatewayDescriptor gateway = tableEntry.getGatewayDescriptor();
 		
 		if( gateway.getPort() == 0)
 		{
-			//LFXLogInfo(@"Service %@/%@:%u unavailable (port == 0), ignoring", gateway.protocolString, gateway.host, gateway.port);
 			return;
 		}
 		
@@ -368,25 +346,12 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
 			}
 		}
 		
-		//System.out.println( "Gateway Already Exists: " + tableEntry.getGatewayDescriptor().toString());
-		
 		if( existingConnection == null)
 		{
-			//LFXLogInfo(@"Service %@/%@:%u has no existing connection, connecting", gateway.protocolString, gateway.host, gateway.port);
-			//System.out.println( "Connection DId not exist");
-			//System.out.println( "Starting Gateway: " + tableEntry.getGatewayDescriptor().toString());
-			
-//			if( gateway == null)
-//			{
-//				System.out.println( "Gateway == null");
-//			}
-			
 			LFXGatewayConnection newConnection = LFXGatewayConnection.getGatewayConnectionWithGatewayDescriptor( gateway, this);
 			newConnection.connect();
 			gatewayConnections.put( gateway, newConnection);
 			connectionStatesDidChange();
-			
-			//System.out.println( newConnection.getConnectionStateString());
 		}
 	}
 }

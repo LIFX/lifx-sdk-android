@@ -1,0 +1,42 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="LIGHTS"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        android:background="#ff2e2e2e"
+        android:textColor="#ffffffff"/>
+    
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:background="#fff7f7f7" 
+        android:id="@+id/light_list_view"
+        android:layout_weight="5"/>
+    
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="GROUPS"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        android:background="#ff2e2e2e"
+        android:textColor="#ffffffff"/>
+    
+    <ListView
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:background="#fff7f7f7" 
+        android:id="@+id/group_list_view"
+        android:layout_weight="5"/>
+
+</LinearLayout>

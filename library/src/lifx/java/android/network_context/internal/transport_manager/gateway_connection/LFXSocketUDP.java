@@ -5,25 +5,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import lifx.java.android.entities.internal.LFXMessage;
-
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
 public class LFXSocketUDP extends LFXSocketGeneric
 {	
-	private static final int DEFAULT_PORT = 56700;
-	
-	//private static final int UDP_SOCKET_TIME_OUT = 25000;		// 20 second timeout
-	
 	// Variables for receiving
     private Thread asyncReceiveThread;
-    
-    // Variables for Connection keep alive
-    //private Thread keepAliveThread;
-//    private Object lockObject = new Object();
-//    private long lastTraffic = 0;
     
     // Variables for sending
     private Thread asyncSendThread;
@@ -68,17 +56,8 @@ public class LFXSocketUDP extends LFXSocketGeneric
                     InetAddress ipAddress;
                     int port;
                     
-//                    if( isBroadcast)
-//                    {
-//                    	ipAddress = InetAddress.getByAddress( broadcastIpAddress);
-//                    	port = broadcastPort;
-//                    	dataGramSocket.setBroadcast( true);
-//                    }
-//                    else
-//                    {
-                    	ipAddress = InetAddress.getByAddress( message.getIpAddress());
-                    	port = message.getPort();
-//                    }
+                    ipAddress = InetAddress.getByAddress( message.getIpAddress());
+                    port = message.getPort();
                    
                     udpPacket = new DatagramPacket( messageData, messageData.length, ipAddress, port);
                 	

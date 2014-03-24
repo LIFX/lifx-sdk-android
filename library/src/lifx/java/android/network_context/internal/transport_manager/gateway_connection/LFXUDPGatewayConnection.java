@@ -12,6 +12,7 @@ import lifx.java.android.constant.LFXSDKConstants;
 import lifx.java.android.entities.internal.LFXGatewayDescriptor;
 import lifx.java.android.entities.internal.LFXMessage;
 import lifx.java.android.entities.internal.structle.LxProtocol.Type;
+import lifx.java.android.internal.LFXWiFiObserver;
 import lifx.java.android.network_context.internal.transport_manager.gateway_connection.LFXSocketGeneric.SocketMessage;
 import lifx.java.android.network_context.internal.transport_manager.gateway_connection.LFXSocketGeneric.SocketMessageListener;
 import lifx.java.android.network_context.internal.transport_manager.gateway_connection.LFXSocketGeneric.SocketState;
@@ -19,12 +20,9 @@ import lifx.java.android.network_context.internal.transport_manager.gateway_conn
 import lifx.java.android.util.LFXLog;
 import lifx.java.android.util.LFXNetworkUtils;
 import lifx.java.android.util.LFXTimerUtils;
-import lifx.java.internal.LFXWiFiObserver;
 
 public class LFXUDPGatewayConnection extends LFXGatewayConnection implements SocketMessageListener, SocketStateListener
 {
-	private final static boolean LOG_FILE_ENABLED = false;
-
 	private Queue<LFXMessage> messageOutbox;
 	private LFXSocketGeneric socket;
 	private Timer outboxTimer;
@@ -37,7 +35,6 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 		{
 			public void run()
 			{
-				//System.out.println( "Heartbeat fired: " + getGatewayDescriptor().toString() + ", " + this);
 				heartbeatTimerDidFire();
 			}
 		};
@@ -106,17 +103,14 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
 	public void connect()
 	{
-		LFXLog.Debug( "ConnectionState: " + getConnectionState());
+		LFXLog.debug( "ConnectionState: " + getConnectionState());
 		if( getConnectionState() != LFXGatewayConnectionState.NOT_CONNECTED)
 		{
 			return;
 		}
 		
-		LFXLog.Verbose( "Connecting UDP Socket " + getGatewayDescriptor().getHost() + ":" + getGatewayDescriptor().getPort());
-		String error = null;
-		
-//		InetAddress.getByName( getGatewayDescriptor().getHost());
-		
+		LFXLog.verbose( "Connecting UDP Socket " + getGatewayDescriptor().getHost() + ":" + getGatewayDescriptor().getPort());
+
 		try
 		{
 			socket.addMessageListener( this);
@@ -128,38 +122,11 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 		{
 			e.printStackTrace();
 		}
-		
-//	    [self.socket bindToPort:self.gatewayDescriptor.port error:&error];
-//		if( error != null)
-//		{
-//			[self.delegate gatewayConnection:self didDisconnectWithError:error];
-//			return;
-//		}
-//		
-//		error = null;
-//	    [self.socket beginReceiving:&error];
-//		if( error != null)
-//		{
-//			[self.delegate gatewayConnection:self didDisconnectWithError:error];
-//			return;
-//		}
-//		
-//		if ([[self.gatewayDescriptor.host componentsSeparatedByString:@"."].lastObject isEqualToString:@"255"])
-//		{
-//			error = nil;
-//			[self.socket enableBroadcast:YES error:nil];
-//			if (error)
-//			{
-//				[self.delegate gatewayConnection:self didDisconnectWithError:error];
-//				return;
-//			}
-//		}
-//
 	}
 
 	private boolean shouldIgnoreDataFromHost( String host)
 	{
-	    String localHost = LFXNetworkUtils.getLocalHostAddress();//[[UIDevice currentDevice] lfx_bestIPAddress];
+	    String localHost = LFXNetworkUtils.getLocalHostAddress();
 		return localHost.equals( host);
 	}
 
@@ -178,14 +145,12 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 			{
 				outboxAsLinkedList.remove( outboxIndex);
 				outboxAsLinkedList.add( outboxIndex, message);
-				//System.out.println( message.getPath().toString());
 				logMessageOutboxSize();
 				return;
 			}
 		}
 		
 		messageOutbox.add( message);
-		//System.out.println( message.getPath().toString());
 		logMessageOutboxSize();
 	}
 
@@ -198,14 +163,10 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 			return;
 		}
 		
-		//System.out.println( "SEND MESSAGE: " + nextMessage.getType());
-		
 		byte[] messageData = nextMessage.getMessageDataRepresentation();
-		//LFXLogVerbose(@"Sending message on %@ on connection %@:%hu %@", self.gatewayDescriptor.protocolString, self.gatewayDescriptor.host, self.gatewayDescriptor.port, nextMessage.niceLoggingDescription);
-		//socket.sendData( messageData, getGatewayDescriptor().getHost(), getGatewayDescriptor().getPort());
+
 		try
 		{
-			//rintln( getGatewayDescriptor().getHost());
 			socket.sendMessage( new SocketMessage( messageData, InetAddress.getByName( getGatewayDescriptor().getHost()).getAddress(), getGatewayDescriptor().getPort()));
 		} 
 		catch( UnknownHostException e)
@@ -238,7 +199,7 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 				types.put( key, bla);
 			}
 			
-			LFXLog.Warn( "UDP " + getGatewayDescriptor().getHost() + " Message Outbox backlog is " + messageOutbox.size());
+			LFXLog.warn( "UDP " + getGatewayDescriptor().getHost() + " Message Outbox backlog is " + messageOutbox.size());
 			for( String aKey : types.keySet())
 			{
 				System.out.print( aKey + ": " + types.get( aKey) + ", ");
@@ -266,8 +227,7 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
 	public void idleTimeoutTimerDidFire()
 	{
-		// TODO:
-		LFXLog.Warn( "Idle timeout occured on UDP Connection " + toString() + ", disconnecting");
+		LFXLog.warn( "Idle timeout occured on UDP Connection " + toString() + ", disconnecting");
 		setConnectionState( LFXGatewayConnectionState.NOT_CONNECTED);
 		getListener().gatewayConnectionDidDisconnectWithError( this, null);
 	}
@@ -307,16 +267,10 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 		
 		if( message == null)
 		{
-			LFXLog.Error( "Couldn't create message from data: " + data);
+			LFXLog.error( "Couldn't create message from data: " + data);
 			LFXLog.LFXMessage( data);
 			return;
 		}
-		else
-		{
-			//System.out.println( "Message Received: " + message.getType().toString());
-		}
-		
-		//System.out.println( "Listener is: " + getListener());
 		
 	    if( getListener() != null)
 		{
@@ -324,7 +278,6 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 			// UDP listener and gateway specific UDP listeners "receiving" the message.
 			if( getGatewayDescriptor().getHost().equals( LFXWiFiObserver.getWiFiBroadcastAddress()))
 			{
-				//[self.delegate gatewayConnection:self didReceiveMessage:message fromHost:[GCDAsyncUdpSocket hostFromAddress:address]];
 				getListener().gatewayConnectionDidReceiveMessageFromHost( this, message, host);
 			}
 	    }
@@ -350,7 +303,11 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 		socket.close();
 		heartbeatTimer.cancel();
 		outboxTimer.cancel();
-		// TODO: idleTimeoutTimer.cancel();
+		
+		if( idleTimeoutTimer != null)
+		{
+			idleTimeoutTimer.cancel();
+		}
 	}
 
 	@Override

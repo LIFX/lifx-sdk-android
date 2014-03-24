@@ -3,7 +3,6 @@ package lifx.java.android.network_context.internal.transport_manager.gateway_con
 import java.util.ArrayList;
 
 import lifx.java.android.entities.internal.LFXMessage;
-import lifx.java.android.entities.internal.structle.StructleTypes;
 import lifx.java.android.util.LFXByteUtils;
 
 import android.content.Context;

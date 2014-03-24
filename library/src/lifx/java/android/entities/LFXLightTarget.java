@@ -40,11 +40,16 @@ public abstract class LFXLightTarget
 	// Light State
 	public String getLabel()
 	{
+		if( label == null)
+		{
+			return "Unknown";
+		}
+		
 		return label;
 	}
 	
 	public LFXHSBKColor getColor()
-	{
+	{		
 		return color;
 	}
 	

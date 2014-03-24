@@ -9,6 +9,8 @@ package lifx.java.android.entities.internal.structle;
 
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
+
 import lifx.java.android.entities.internal.structle.StructleTypes.Bool8;
 import lifx.java.android.entities.internal.structle.StructleTypes.Float32;
 import lifx.java.android.entities.internal.structle.StructleTypes.Int16;
@@ -22,7 +24,8 @@ import lifx.java.android.entities.internal.structle.StructleTypes.UInt32;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt64;
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt8;
 
-
+@SuppressLint( "UseSparseArrays")
+@SuppressWarnings( "unused")
 public class LxProtocolWan
 {
 

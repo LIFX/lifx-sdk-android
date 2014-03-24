@@ -1,10 +1,10 @@
 package lifx.java.android.client;
 
 import android.content.Context;
+import lifx.java.android.internal.LFXWiFiObserver;
+import lifx.java.android.internal.LFXWiFiObserver.LFXWiFiObserverCallback;
 import lifx.java.android.network_context.LFXNetworkContext;
 import lifx.java.android.network_context.internal.transport_manager.lan.LFXLANTransportManager;
-import lifx.java.internal.LFXWiFiObserver;
-import lifx.java.internal.LFXWiFiObserver.LFXWiFiObserverCallback;
 
 public class LFXClient
 {

@@ -1,4 +1,4 @@
-package lifx.java.internal;
+package lifx.java.android.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import java.util.TimerTask;
 import android.content.Context;
 
 import lifx.java.android.util.LFXNetworkUtils;
-import lifx.java.android.util.LFXTimerUtils;
 
 public class LFXWiFiObserver
 {
@@ -70,6 +69,7 @@ public class LFXWiFiObserver
 		}
 	}
 	
+	@SuppressWarnings( "unused")
 	private Runnable getWifiPollTimerTask()
 	{
 		Runnable wifiPollTimerTask = new TimerTask() 
@@ -86,43 +86,29 @@ public class LFXWiFiObserver
 	private LFXWiFiObserver()
 	{
 		observationDescriptors = new ArrayList<LFXWiFiObservationDescriptor>();
-		System.out.println( "Making Wifi Timer task.");
-		wifiStatePollingTimer = LFXTimerUtils.getTimerTaskWithPeriod( getWifiPollTimerTask(), 1000, false); 
-		//wifiStatePollingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(wifiPollingTimerDidFire:) userInfo:nil repeats:YES];
+		//wifiStatePollingTimer = LFXTimerUtils.getTimerTaskWithPeriod( getWifiPollTimerTask(), 1000, false); 
 	}
 
+	@SuppressWarnings( "unused")
 	private Timer wifiStatePollingTimer;
 	private ArrayList<LFXWiFiObservationDescriptor> observationDescriptors;
 
+	@SuppressWarnings( { "unused", "rawtypes" })
 	private HashMap cachedNetworkInfo;
 
 	private void wifiPollingTimerDidFire()
 	{
-//		NSDictionary *freshNetworkInfo = [self freshNetworkInfo];
-//		if ((!self.cachedNetworkInfo && freshNetworkInfo) ||
-//			(self.cachedNetworkInfo && ![self.cachedNetworkInfo isEqual:freshNetworkInfo]))
-//		{
-//			self.cachedNetworkInfo = freshNetworkInfo;
-//			[self sendObservationCallbacks];
-//		}
 	}
 
+	@SuppressWarnings( { "rawtypes", "unused" })
 	private HashMap getFreshNetworkInfo()
 	{
-//		NSArray *interfaceNames = (__bridge NSArray *)CNCopySupportedInterfaces();
-//		if (interfaceNames.firstObject)
-//		{
-//			NSDictionary *infoDictionary = (__bridge NSDictionary *)CNCopyCurrentNetworkInfo((__bridge CFStringRef)interfaceNames.firstObject);
-//			return infoDictionary;
-//		}
-//		return nil;
-		
 		return null;
 	}
 
+	@SuppressWarnings( "unused")
 	private String getCurrentSSID()
 	{
-		//return self.freshNetworkInfo[(NSString *)kCNNetworkInfoKeySSID];
 		return null;
 	}
 
@@ -139,6 +125,7 @@ public class LFXWiFiObserver
 		observationDescriptors.add( observationDescriptor);
 	}
 
+	@SuppressWarnings( "unchecked")
 	public void removeObserverObject( Object object)
 	{
 		for( LFXWiFiObservationDescriptor anObservationDescriptor : (ArrayList<LFXWiFiObservationDescriptor>) observationDescriptors.clone())
@@ -150,6 +137,7 @@ public class LFXWiFiObserver
 		}
 	}
 
+	@SuppressWarnings( "unused")
 	private void sendObservationCallbacks()
 	{
 		for( LFXWiFiObservationDescriptor anObservationDescriptor : observationDescriptors)

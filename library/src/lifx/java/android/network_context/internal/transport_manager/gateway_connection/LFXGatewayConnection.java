@@ -43,7 +43,7 @@ public abstract class LFXGatewayConnection
 		switch( gatewayDescriptor.getService())
 		{
 			case LX_PROTOCOL_DEVICE_SERVICE_TCP:
-				//return [[LFXTCPGatewayCwonnection alloc] initWithGatewayDescriptor:gateway delegate:delegate];
+				break;
 			case LX_PROTOCOL_DEVICE_SERVICE_UDP:
 				return new LFXUDPGatewayConnection( gatewayDescriptor, listener);
 			default:
@@ -102,19 +102,12 @@ public abstract class LFXGatewayConnection
 		public void gatewayConnectionDidDisconnectWithError( LFXGatewayConnection connection, String error);
 	}
 
-	public String toString()
-	{
-		return "";
-		//return [NSString stringWithFormat:@"<%p (%@/%@:%hu)>", self, self.gatewayDescriptor.protocolString, self.gatewayDescriptor.host, self.gatewayDescriptor.port];
-	}
-
 	public String getConnectionStateString()
 	{
 		return this.connectionState.toString();
 	}
 
 	// For subclasses to use when queueing messages in an outbox
-	//protected static boolean newMessage:(LFXMessage *)newMessage makesQueuedMessageRedundant:(LFXMessage *)queuedMessage
 	protected static boolean newMessageMakesQueuedMessageRedundant( LFXMessage newMessage , LFXMessage queuedMessage)
 	{
 		if( newMessage.getType() != queuedMessage.getType()) 				// if the message types are not equal
@@ -124,8 +117,6 @@ public abstract class LFXGatewayConnection
 		
 		if( !newMessage.getPath().equals( queuedMessage.getPath()))			// if the message paths are not equal
 		{
-			System.out.println( "Paths are not equal.");
-			System.out.println( newMessage.getPath().toString() + " :: " + queuedMessage.getPath().toString());
 			return false;
 		}
 		
@@ -135,7 +126,6 @@ public abstract class LFXGatewayConnection
 //			return false;
 //		}
 		
-		//System.out.println( "REPLACING MESSAGE IN QUEUE!");
 		return true;
 	}
 

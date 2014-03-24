@@ -15,13 +15,13 @@ import lifx.java.android.util.LFXLog;
 
 public class LFXMessage
 {
-	private static final String PAYLOAD_SIZE_FIELD_NAME = "PAYLOAD_SIZE";
+	private static final String PAYLOAD_SIZE_METHOD_NAME = "getPayloadSize";
 	
 	private static final short ADDRESSABLE_BIT = 0x1000;
 	private static final short TAGGED_BIT = 0x2000;
 	private static final int PROTOCOL_VERSION_BITS = 0x0FFF;
 	
-	private static final short ACKNOWLEDGEMENT_BIT = 0x0001;
+	//private static final short ACKNOWLEDGEMENT_BIT = 0x0001;
 	
 	private static final int LX_PROTOCOL_V1 = 1024;
 	private static final int CURRENT_PROTOCOL = LX_PROTOCOL_V1;
@@ -34,10 +34,7 @@ public class LFXMessage
 		OUTGOING,
 	};
 
-	// This is the factory method which should be used for data off the network.
-	// It will automatically select the correct class and handle parsing for you.
-
-	private long timestamp;		// When the message was received (incoming) or created (outgoing)
+	private long timestamp;								// When the message was received (incoming) or created (outgoing)
 
 	private LFXMessageDirection messageDirection;		// incoming/outgoing
 	private LFXGatewayDescriptor gatewayDescriptor;		// will be set by the message router when sent/received
@@ -59,13 +56,14 @@ public class LFXMessage
 	private LxProtocolTypeBase payload;
 
 	// Non-protocol messages
+	@SuppressWarnings( "unused")
 	private boolean isNonProtocolMessage = false;
+	@SuppressWarnings( "unused")
 	private byte[] rawData;
 
 	// Routing Preferences
 	private boolean prefersUDPOverTCP = false;
 	
-	// ***************************************************
 	private static boolean messageIsAddressable( byte[] data)
 	{
 		boolean addressable = false;
@@ -228,14 +226,14 @@ public class LFXMessage
 		if( !messageIsAddressable( bytes))
 		{
 			// We don't know how to deal with non-addressable messages, but the bulbs are sometimes not setting this flag correctly
-			LFXLog.Warn( "Warning: Message claims to be non-addressable: " + data);
+			LFXLog.warn( "Warning: Message claims to be non-addressable: " + data);
 			return null;
 		}
 		
 		int protocol = getProtocolFromMessageData( bytes);
-		if( protocol != LX_PROTOCOL_V1)
+		if( protocol != CURRENT_PROTOCOL)
 		{
-			LFXLog.Warn( "Handling non-protocol message of protocol " + protocol);
+			LFXLog.warn( "Handling non-protocol message of protocol " + protocol);
 			return LFXMessage.initWithNonProtocolMessageData( data);
 		}
 		
@@ -309,7 +307,7 @@ public class LFXMessage
 		{
 			target = LFXBinaryTargetID.getDeviceTargetIDWithData( getTargetFromMessageData( bytes));
 		}
-		//LFXBinaryTargetID *target = frame.tagged ? [LFXBinaryTargetID groupTargetIDWithTagField:*((tagField_t *)&frame.target)] : [LFXBinaryTargetID deviceTargetIDWithData:[NSData dataWithBytes:frame.target length:6]];
+		
 		message.path = LFXBinaryPath.getPathWithSiteIDAndTargetID( site, target);
 		
 		message.rawData = data;
@@ -329,7 +327,7 @@ public class LFXMessage
 		
 		message.timestamp = System.currentTimeMillis();
 		message.messageDirection = LFXMessageDirection.OUTGOING;
-		message.protocol = LX_PROTOCOL_V1;
+		message.protocol = CURRENT_PROTOCOL;
 			
 		message.path = LFXBinaryPath.getPathWithSiteIDAndTargetID( LFXSiteID.getZeroSiteID(), LFXBinaryTargetID.getBroadcastTargetID());
 		message.payload = null;
@@ -345,18 +343,15 @@ public class LFXMessage
 		Class<? extends LxProtocolTypeBase> payloadClass = LxProtocol.typeClassMap.get( messageType);
 		int payloadLength = 0;
 		
-		// PAYLOAD_SIZE
-		
 		try
 		{
-			Method method = payloadClass.getMethod( "getPayloadSize");
+			Method method = payloadClass.getMethod( PAYLOAD_SIZE_METHOD_NAME);
 			Object o = method.invoke( null);
 			
 			if( o != null)
 			{
 				payloadLength = (Integer) o;
 			}
-			//payloadLength = payloadClass.getField( PAYLOAD_SIZE_FIELD_NAME).getInt( null);
 		} 
 		catch( IllegalAccessException e)
 		{
@@ -368,12 +363,10 @@ public class LFXMessage
 		} 
 		catch( NoSuchMethodException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		catch( InvocationTargetException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -478,11 +471,6 @@ public class LFXMessage
 			data = new byte[BASE_MESSAGE_SIZE];
 		}
 		
-//		if(size == 0)
-//		{
-//			System.out.println( "Packed Massage with size == 0");
-//		}
-		
 		writeSizeToMessage( (short) data.length, data);
 		writeProtocolToMessage( (short) protocol, data);
 		writeIsAddressableToMessage( true, data);
@@ -497,30 +485,9 @@ public class LFXMessage
 		}
 		else
 		{
-			//System.out.println( "Path: " + path.getDebugStringValue());
 			writeTargetIDtoMessage( path.getBinaryTargetID().getGroupTagField().tagData, data);
 			writeIsTaggedToMessage( true, data);
 		}
-		
-//		protocol.size = _size;
-//		protocol.protocol = _protocol;
-//		protocol.addressable = 1;
-//		protocol.at_time = _atTime;
-//		protocol.type = [self messageType];
-		
-//		[_path.siteID.dataValue getBytes:protocol.site];
-//		
-//		if (_path.targetID.targetType == LFXBinaryTargetTypeDevice)
-//		{
-//			protocol.tagged = 0;
-//			[_path.targetID.deviceDataValue getBytes:protocol.target];
-//		}
-//		else
-//		{
-//			protocol.tagged = 1;
-//			tagField_t tagField = _path.targetID.groupTagField;
-//			memcpy(protocol.target, &tagField, sizeof(tagField));
-//		}
 		
 		if( payload != null)
 		{
@@ -529,26 +496,8 @@ public class LFXMessage
 			LFXByteUtils.copyBytesIntoByteArrayAtOffset( data, payloadData, PAYLOAD_START_INDEX);
 		}
 		
-//		NSData *payloadData = self.payload.dataValue;
-//		NSUInteger prePayloadLength = __offsetof(lx_protocol_t, payload);
-//		protocol.size = prePayloadLength + payloadData.length;
-//		[data appendBytes:&protocol length:prePayloadLength];
-//		[data appendData:payloadData];
-//		
 		return data;
 	}
-
-	//+ (instancetype)messageWithPath:(LFXBinaryPath *)path
-	//{
-//		LFXMessage *message = [[self alloc] init];
-//		message.path = path;
-//		return message;
-	//}
-	//
-	//+ (instancetype)messageWithSite:(LFXSiteID *)site
-	//{
-//		return [self messageWithPath:[LFXBinaryPath pathWithSiteID:site targetID:[LFXBinaryTargetID broadcastTargetID]]];
-	//}
 
 	public static LFXMessage messageWithType( Type type)
 	{
@@ -607,34 +556,6 @@ public class LFXMessage
 		return false;
 	}
 
-//	- (NSString *)description
-//	{
-//		NSMutableString *str = [NSMutableString new];
-//		[str appendFormat:@"<%@ %p>", self.class, self];
-//		[str appendString:self.messageDirection == LFXMessageDirectionOutgoing ? @" out" : @" in"];
-//		[str appendFormat:@" path = %@, protocol = %i, type = %i, timestamp = %@", _path.debugStringValue, _protocol, self.messageType, _timestamp];
-//		for (NSString *aPropertyKey in self.payload.propertyKeysToBeAddedToDescription)
-//		{
-//			[str appendFormat:@" %@ = %@", aPropertyKey, [self.payload valueForKey:aPropertyKey]];
-//		}
-//		return str;
-//	}
-
-//	- (NSString *)niceLoggingDescription
-//	{
-//		NSMutableString *str = [NSMutableString new];
-//		
-//		NSString *messageName = NSStringFromClass(self.class);
-//		if ([messageName hasPrefix:@"LFXMessage"]) messageName = [messageName substringFromIndex:@"LFXMessage".length];
-//		[str appendString:messageName];
-//		[str appendFormat:@" path = %@,", _path.debugStringValue];
-//		for (NSString *aPropertyKey in self.payload.propertyKeysToBeAddedToDescription)
-//		{
-//			[str appendFormat:@" %@ = %@", aPropertyKey, [self.payload valueForKey:aPropertyKey]];
-//		}
-//		return str;
-//	}
-	
 	public Object clone()
 	{
 		LFXMessage message = new LFXMessage( this.messageType);

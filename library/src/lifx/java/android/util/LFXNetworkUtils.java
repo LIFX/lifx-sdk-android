@@ -1,22 +1,21 @@
 package lifx.java.android.util;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 
 public class LFXNetworkUtils
 {
+	@SuppressLint( "DefaultLocale")
 	public static String getLocalHostAddress() 
 	{
 		boolean useIPv4 = true;
@@ -110,7 +109,6 @@ public class LFXNetworkUtils
 	{
 	    WifiManager wifi = (WifiManager) context.getSystemService( Context.WIFI_SERVICE);
 	    DhcpInfo dhcp = wifi.getDhcpInfo();
-	    // handle null somehow
 
 	    int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
 	    byte[] quads = new byte[4];
@@ -122,7 +120,6 @@ public class LFXNetworkUtils
 		} 
 	    catch( UnknownHostException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    

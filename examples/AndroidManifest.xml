@@ -29,13 +29,28 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.lifx_sdk_samples.GroupPowerActivity"
-            android:label="@string/app_name" >
+            android:name="com.example.lifx_sdk_samples.LFXSDKSamplesActivity"
+            android:label="LIFX SDK Samples" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="com.example.lifx_sdk_samples.LFXSDKLightPowerActivity"
+            android:label="Toggle Power">
+        </activity>
+        
+        <activity
+            android:name="com.example.lifx_sdk_samples.LFXSDKLightEditLabelActivity"
+            android:label="Edit Label">
+        </activity>
+        
+        <activity
+            android:name="com.example.lifx_sdk_samples.LFXSDKLightRandomColorActivity"
+            android:label="Random Color">
         </activity>
     </application>
 
