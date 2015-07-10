@@ -93,7 +93,10 @@ public class LFXGatewayDiscoveryController
 		int port = (int) statePanGatewayPayload.getPort().getValue();
 		LFXBinaryPath path = statePanGateway.getPath();
 		Service service = LxProtocolDevice.serviceMap.get( statePanGatewayPayload.getService().getValue());
-		
+
+		// cakey123445 quick HACK, getService is returning 5???? maps to null
+		if(service==null) service=Service.LX_PROTOCOL_DEVICE_SERVICE_UDP;
+
 		// TODO: remove to enable TCP
 		if( service == Service.LX_PROTOCOL_DEVICE_SERVICE_TCP)
 		{

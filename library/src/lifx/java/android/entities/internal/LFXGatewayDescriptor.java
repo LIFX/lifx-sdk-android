@@ -19,6 +19,10 @@ public class LFXGatewayDescriptor
 	private LFXBinaryPath path;
 	private LxProtocolDevice.Service service;
 
+    public LFXGatewayDescriptor() {
+
+    }
+
 	public static LFXGatewayDescriptor getGatewayDescriptorWithHostPortPathService( String host, int port, LFXBinaryPath path, LxProtocolDevice.Service service)
 	{
 		LFXGatewayDescriptor gatewayDescriptor = new LFXGatewayDescriptor();

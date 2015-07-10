@@ -60,7 +60,7 @@ public class LxProtocolDevice
   		// Fields: site;
   		private byte[]  site = new byte[6];		// Field: site - Structle::Bytes byte offset: 0
   
-  private static final int PAYLOAD_SIZE = 6;
+  		private static final int PAYLOAD_SIZE = 6;
   
   		public SetSite( byte[] bytes)
   		{
@@ -80,147 +80,105 @@ public class LxProtocolDevice
   				
   			site = member0Data; 
     		
-    		}
+		}
     		
-    		public SetSite( Object padding
-  		, byte[]  site	
-    			)
-    		{
+    	public SetSite(Object padding, byte[] site)
+		{
     			this.site = site;
-    		}
+		}
     		
-  		public byte[]  getSite()
-    		{
-    			return site;
-    		}		
+  		public byte[] getSite()
+		{
+			return site;
+		}
     		
-    		public void printMessageData()
-    		{
-  		System.out.println( "Byte Array Print not currently supported");
-    		}
+		public void printMessageData()
+		{
+  			System.out.println( "Byte Array Print not currently supported");
+		}
     		
-    		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset
-  		, byte[]  site	
-    			)
-    		{
-    			byte[] memberData;		// = name.getBytes();
+		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset, byte[]  site)
+		{
+			byte[] memberData;		// = name.getBytes();
+	  		memberData = site;
+			System.arraycopy(memberData, 0, messageData, offset, memberData.length);
+			offset += memberData.length;
+		}
     		
+		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData, byte[]  site)
+		{
+			int offset = PAYLOAD_OFFSET;
+			loadMessageDataWithPayloadAtOffset( messageData, offset, site);
+		}
+    		
+		public byte[] getBytes()
+		{
+			int offset = 0;
+			byte[] bytes = new byte[getPayloadSize()];
+			byte[] memberData;
     			
+			// = name.getBytes();
+  			memberData = site;
+			System.arraycopy(memberData, 0, bytes, offset, memberData.length);
+			offset += memberData.length;
+
+			return bytes;
+		}
     		
-  		memberData = site;	
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				messageData[(offset + i)] = memberData[i];
-    			}
-    		
-    			offset += memberData.length;
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData
-  		, byte[]  site	
-    			)
-    		{
-    			int offset = PAYLOAD_OFFSET;
-    			
-    			loadMessageDataWithPayloadAtOffset( messageData, offset
-  		, site	
-    			);
-    		}
-    		
-    		public byte[] getBytes()
-    		{
-    			int offset = 0;
-    		
-    			byte[] bytes = new byte[getPayloadSize()];
-    			
-    			byte[] memberData;
-    			
-    			// = name.getBytes();        		
-  		memberData = site;	
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				bytes[(offset + i)] = memberData[i];
-    			}
-    			
-    			offset += memberData.length;
-    			
-    			return bytes;
-    		}
-    		
-    		public static int getPayloadSize()
-    		{
-    			return PAYLOAD_SIZE;
-    		}
+		public static int getPayloadSize()
+		{
+			return PAYLOAD_SIZE;
+		}
 	}
 	
 	public static class GetPanGateway extends LxProtocolTypeBase		// Struct: Lx::Protocol::Device::GetPanGateway 
 	{
-  
-  private static final int PAYLOAD_SIZE = 0;
+  		private static final int PAYLOAD_SIZE = 0;
   
   		public GetPanGateway( byte[] bytes)
   		{
   			this( bytes, 0);
   		}
   
-  		public GetPanGateway( byte[] bytes, int initialOffset)
-  		{
-    		}
+  		public GetPanGateway( byte[] bytes, int initialOffset) { }
+		public GetPanGateway( Object padding) { }
+		public void printMessageData() { }
     		
-    		public GetPanGateway( Object padding
-    			)
-    		{
-    		}
+		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset)
+		{
+			byte[] memberData;		// = name.getBytes();
+		}
     		
+		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData)
+		{
+			int offset = PAYLOAD_OFFSET;
+			loadMessageDataWithPayloadAtOffset( messageData, offset);
+		}
     		
-    		public void printMessageData()
-    		{
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset
-    			)
-    		{
-    			byte[] memberData;		// = name.getBytes();
-    		
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData
-    			)
-    		{
-    			int offset = PAYLOAD_OFFSET;
-    			
-    			loadMessageDataWithPayloadAtOffset( messageData, offset
-    			);
-    		}
-    		
-    		public byte[] getBytes()
-    		{
+		public byte[] getBytes()
+		{
     			int offset = 0;
-    		
     			byte[] bytes = new byte[getPayloadSize()];
-    			
     			byte[] memberData;
     			
-    			
     			return bytes;
-    		}
+		}
     		
-    		public static int getPayloadSize()
-    		{
+    	public static int getPayloadSize()
+		{
     			return PAYLOAD_SIZE;
-    		}
+		}
 	}
 	
 	public static class StatePanGateway extends LxProtocolTypeBase		// Struct: Lx::Protocol::Device::StatePanGateway 
 	{
+		private static final int PAYLOAD_SIZE = 5;
+
   		// Fields: service, port;
   		private UInt8  service;			// Field: service - Structle::Uint8 byte offset: 0
   		private UInt32 port;			// Field: port - Structle::Uint32 byte offset: 1
   
-  private static final int PAYLOAD_SIZE = 5;
-  
+
   		public StatePanGateway( byte[] bytes)
   		{
   			this( bytes, 0);
@@ -229,9 +187,8 @@ public class LxProtocolDevice
   		public StatePanGateway( byte[] bytes, int initialOffset)
   		{
 			byte[] member0Data = new byte[1];
-			member0Data[0] = bytes[initialOffset + 0];
-  			
-  				
+			member0Data[0] = bytes[initialOffset];
+
   			service = new UInt8( member0Data); 
     		
 			byte[] member1Data = new byte[4];
@@ -239,179 +196,110 @@ public class LxProtocolDevice
 			member1Data[1] = bytes[initialOffset + 2];
 			member1Data[2] = bytes[initialOffset + 3];
 			member1Data[3] = bytes[initialOffset + 4];
-  			
-  				
-  			port = new UInt32( member1Data); 
+
+  			port = new UInt32( member1Data);
+		}
     		
-    		}
+		public StatePanGateway(Object padding,UInt8 service, UInt32 port)
+		{
+			this.service = service;
+			this.port = port;
+		}
     		
-    		public StatePanGateway( Object padding
-  		, UInt8  service
-  		, UInt32 port
-    			)
-    		{
-    			this.service = service;
-    			this.port = port;
-    		}
+  		public UInt8 getService()
+		{
+			return service;
+		}
+
+		public UInt32 getPort()
+        {
+            return port;
+        }
     		
-  		public UInt8   getService()
-    		{
-    			return service;
-    		}			
-  		public UInt32  getPort()
-    		{
-    			return port;
-    		}			
+        public void printMessageData()
+        {
+            service.printValue( "service");			// Field: service - Structle::Uint8 byte offset: 5
+  		    port.printValue( "port");			// Field: port - Structle::Uint32 byte offset: 5
+        }
     		
-    		public void printMessageData()
-    		{
-  		service.printValue( "service");			// Field: service - Structle::Uint8 byte offset: 5
-  		port.printValue( "port");			// Field: port - Structle::Uint32 byte offset: 5
-    		}
+        public static void loadMessageDataWithPayloadAtOffset(byte[] messageData, int offset, UInt8 service, UInt32 port) {
+            byte[] memberData;        // = name.getBytes();
+
+            memberData = service.getBytes();
+            System.arraycopy(memberData, 0, messageData, offset, memberData.length);
+            offset += memberData.length;
+
+            memberData = port.getBytes();
+            System.arraycopy(memberData, 0, messageData, offset, memberData.length);
+
+            offset += memberData.length;
+        }
     		
-    		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset
-  		, UInt8  service
-  		, UInt32 port
-    			)
-    		{
-    			byte[] memberData;		// = name.getBytes();
+        public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData, UInt8 service, UInt32 port)
+        {
+            int offset = PAYLOAD_OFFSET;
+            loadMessageDataWithPayloadAtOffset(messageData, offset, service, port);
+        }
     		
-    			
+        public byte[] getBytes() {
+            int offset = 0;
+            byte[] bytes = new byte[getPayloadSize()];
+            byte[] memberData;
+
+            // = name.getBytes();
+            memberData = service.getBytes();
+            System.arraycopy(memberData, 0, bytes, offset, memberData.length);
+            offset += memberData.length;
+
+            // = name.getBytes();
+            memberData = port.getBytes();
+            System.arraycopy(memberData, 0, bytes, offset, memberData.length);
+            offset += memberData.length;
+
+            return bytes;
+        }
     		
-  		memberData = service.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				messageData[(offset + i)] = memberData[i];
-    			}
-    		
-    			offset += memberData.length;
-    			
-    		
-  		memberData = port.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				messageData[(offset + i)] = memberData[i];
-    			}
-    		
-    			offset += memberData.length;
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData
-  		, UInt8  service
-  		, UInt32 port
-    			)
-    		{
-    			int offset = PAYLOAD_OFFSET;
-    			
-    			loadMessageDataWithPayloadAtOffset( messageData, offset
-  		, service
-  		, port
-    			);
-    		}
-    		
-    		public byte[] getBytes()
-    		{
-    			int offset = 0;
-    		
-    			byte[] bytes = new byte[getPayloadSize()];
-    			
-    			byte[] memberData;
-    			
-    			// = name.getBytes();        		
-  		memberData = service.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				bytes[(offset + i)] = memberData[i];
-    			}
-    			
-    			offset += memberData.length;
-    			// = name.getBytes();        		
-  		memberData = port.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				bytes[(offset + i)] = memberData[i];
-    			}
-    			
-    			offset += memberData.length;
-    			
-    			return bytes;
-    		}
-    		
-    		public static int getPayloadSize()
-    		{
-    			return PAYLOAD_SIZE;
-    		}
+        public static int getPayloadSize()
+        {
+            return PAYLOAD_SIZE;
+        }
 	}
 	
 	public static class GetTime extends LxProtocolTypeBase		// Struct: Lx::Protocol::Device::GetTime 
 	{
+        private static final int PAYLOAD_SIZE = 0;
   
-  private static final int PAYLOAD_SIZE = 0;
-  
-  		public GetTime( byte[] bytes)
-  		{
-  			this( bytes, 0);
-  		}
-  
-  		public GetTime( byte[] bytes, int initialOffset)
-  		{
-    		}
+  		public GetTime( byte[] bytes) { }
+  		public GetTime( byte[] bytes, int initialOffset) { }
+        public GetTime( Object padding) {}
+        public void printMessageData() { }
+        public static void loadMessageDataWithPayloadAtOffset(byte[] messageData, int offset) { }
     		
-    		public GetTime( Object padding
-    			)
-    		{
-    		}
+        public static void loadMessageDataWithPayloadAtDefaultOffset(byte[] messageData)
+        {
+            int offset = PAYLOAD_OFFSET;
+            loadMessageDataWithPayloadAtOffset(messageData, offset);
+        }
     		
+        public byte[] getBytes()
+        {
+            int offset = 0;
+            return new byte[getPayloadSize()];
+        }
     		
-    		public void printMessageData()
-    		{
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset
-    			)
-    		{
-    			byte[] memberData;		// = name.getBytes();
-    		
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData
-    			)
-    		{
-    			int offset = PAYLOAD_OFFSET;
-    			
-    			loadMessageDataWithPayloadAtOffset( messageData, offset
-    			);
-    		}
-    		
-    		public byte[] getBytes()
-    		{
-    			int offset = 0;
-    		
-    			byte[] bytes = new byte[getPayloadSize()];
-    			
-    			byte[] memberData;
-    			
-    			
-    			return bytes;
-    		}
-    		
-    		public static int getPayloadSize()
-    		{
-    			return PAYLOAD_SIZE;
-    		}
+        public static int getPayloadSize()
+        {
+            return PAYLOAD_SIZE;
+        }
 	}
 	
 	public static class SetTime extends LxProtocolTypeBase		// Struct: Lx::Protocol::Device::SetTime 
 	{
+        private static final int PAYLOAD_SIZE = 8;
+
   		// Fields: time;
   		private UInt64 time;			// Field: time - Structle::Uint64 byte offset: 0
-  
-  private static final int PAYLOAD_SIZE = 8;
-  
+
   		public SetTime( byte[] bytes)
   		{
   			this( bytes, 0);
@@ -428,83 +316,57 @@ public class LxProtocolDevice
 			member0Data[5] = bytes[initialOffset + 5];
 			member0Data[6] = bytes[initialOffset + 6];
 			member0Data[7] = bytes[initialOffset + 7];
-  			
-  				
-  			time = new UInt64( member0Data); 
+
+  			time = new UInt64( member0Data);
+        }
     		
-    		}
-    		
-    		public SetTime( Object padding
-  		, UInt64 time
-    			)
-    		{
-    			this.time = time;
-    		}
+        public SetTime(Object padding, UInt64 time)
+        {
+            this.time = time;
+        }
     		
   		public UInt64  getTime()
     		{
     			return time;
     		}			
     		
-    		public void printMessageData()
-    		{
-  		time.printValue( "time");			// Field: time - Structle::Uint64 byte offset: 8
-    		}
+        public void printMessageData()
+        {
+  		    time.printValue("time");			// Field: time - Structle::Uint64 byte offset: 8
+        }
     		
-    		public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset
-  		, UInt64 time
-    			)
-    		{
-    			byte[] memberData;		// = name.getBytes();
+        public static void loadMessageDataWithPayloadAtOffset( byte[] messageData, int offset, UInt64 time)
+        {
+            byte[] memberData;		// = name.getBytes();
+  		    memberData = time.getBytes();
+
+            System.arraycopy(memberData, 0, messageData, offset, memberData.length);
+            offset += memberData.length;
+        }
     		
+        public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData, UInt64 time)
+        {
+            int offset = PAYLOAD_OFFSET;
+            loadMessageDataWithPayloadAtOffset( messageData, offset, time);
+        }
+    		
+        public byte[] getBytes()
+        {
+            int offset = 0;
+            byte[] bytes = new byte[getPayloadSize()];
     			
-    		
-  		memberData = time.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				messageData[(offset + i)] = memberData[i];
-    			}
-    		
-    			offset += memberData.length;
-    		}
-    		
-    		public static void loadMessageDataWithPayloadAtDefaultOffset( byte[] messageData
-  		, UInt64 time
-    			)
-    		{
-    			int offset = PAYLOAD_OFFSET;
+            byte[] memberData;
+      		memberData = time.getBytes();
+            System.arraycopy(memberData, 0, bytes, offset, memberData.length);
+            offset += memberData.length;
     			
-    			loadMessageDataWithPayloadAtOffset( messageData, offset
-  		, time
-    			);
-    		}
+            return bytes;
+        }
     		
-    		public byte[] getBytes()
-    		{
-    			int offset = 0;
-    		
-    			byte[] bytes = new byte[getPayloadSize()];
-    			
-    			byte[] memberData;
-    			
-    			// = name.getBytes();        		
-  		memberData = time.getBytes();
-    		
-    			for( int i = 0; i < (memberData.length); i++)
-    			{
-    				bytes[(offset + i)] = memberData[i];
-    			}
-    			
-    			offset += memberData.length;
-    			
-    			return bytes;
-    		}
-    		
-    		public static int getPayloadSize()
-    		{
-    			return PAYLOAD_SIZE;
-    		}
+        public static int getPayloadSize()
+        {
+            return PAYLOAD_SIZE;
+        }
 	}
 	
 	public static class StateTime extends LxProtocolTypeBase		// Struct: Lx::Protocol::Device::StateTime 

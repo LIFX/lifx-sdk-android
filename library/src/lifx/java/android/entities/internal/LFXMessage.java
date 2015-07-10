@@ -8,8 +8,6 @@
 
 package lifx.java.android.entities.internal;
 
-import android.util.Log;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -22,6 +20,7 @@ import lifx.java.android.entities.internal.structle.StructleTypes.LxProtocolType
 import lifx.java.android.entities.internal.structle.StructleTypes.UInt64;
 import lifx.java.android.util.LFXByteUtils;
 import lifx.java.android.util.LFXLog;
+import uk.co.technomunch.sunrise.Log;
 
 public class LFXMessage
 {
