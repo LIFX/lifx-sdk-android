@@ -14,6 +14,11 @@ import lifx.java.android.internal.LFXWiFiObserver;
 
 public class LFXGatewayDescriptor
 {
+	private String host;
+	private int port;
+	private LFXBinaryPath path;
+	private LxProtocolDevice.Service service;
+
 	public static LFXGatewayDescriptor getGatewayDescriptorWithHostPortPathService( String host, int port, LFXBinaryPath path, LxProtocolDevice.Service service)
 	{
 		LFXGatewayDescriptor gatewayDescriptor = new LFXGatewayDescriptor();
@@ -54,11 +59,6 @@ public class LFXGatewayDescriptor
 		return this.equals( getSoftAPGatewayDescriptor());
 	}
 
-	private String host;
-	private int port;
-	private LFXBinaryPath path;
-	private LxProtocolDevice.Service service;
-
 	public String getHost()
 	{
 		return host;
@@ -81,7 +81,7 @@ public class LFXGatewayDescriptor
 
 	public String getProtocolString()
 	{
-		return service.toString();
+		return (service!=null)?service.toString():"(Service was null!)";
 	}
 
 	public String toString()
