@@ -10,90 +10,75 @@ package lifx.java.android.entities.internal;
 
 import java.util.StringTokenizer;
 
-public class LFXBinaryPath
-{
-	public static LFXBinaryPath getPathWithString( String stringPath)
-	{
-		StringTokenizer tokenizer = new StringTokenizer( stringPath, "/");
-		
-		int tokens = tokenizer.countTokens();
-		
-		if( tokens != 2)
-		{
-			return null;
-		}
-		
-		String siteString = tokenizer.nextToken();
-		String targetString = tokenizer.nextToken();
-		return getPathWithSiteIDAndTargetID( LFXSiteID.getSiteIDWithString( siteString), LFXBinaryTargetID.getTargetIDWithString( targetString));
-	}
-	
-	public String getStringValue()
-	{
-		return toString();
-	}
+public class LFXBinaryPath {
+    public static LFXBinaryPath getPathWithString(String stringPath) {
+        StringTokenizer tokenizer = new StringTokenizer(stringPath, "/");
 
-	public String toString()
-	{
-		return siteID.toString() + "/" + targetID.toString();
-	}
-	
-	public static LFXBinaryPath getPathWithSiteIDAndTargetID( LFXSiteID siteID, LFXBinaryTargetID targetID)
-	{
-		LFXBinaryPath path = new LFXBinaryPath();
-		path.siteID = siteID;
-		path.targetID = targetID;
-		return path;
-	}
+        int tokens = tokenizer.countTokens();
 
-	private LFXSiteID siteID;
-	private LFXBinaryTargetID targetID;
-	
-	public LFXSiteID getSiteID()
-	{
-		return siteID;
-	}
-	
-	public LFXBinaryTargetID getBinaryTargetID()
-	{
-		return targetID;
-	}
+        if (tokens != 2) {
+            return null;
+        }
 
-	public String getDebugStringValue()
-	{
-		return toString();
-	}
+        String siteString = tokenizer.nextToken();
+        String targetString = tokenizer.nextToken();
+        return getPathWithSiteIDAndTargetID(LFXSiteID.getSiteIDWithString(siteString), LFXBinaryTargetID.getTargetIDWithString(targetString));
+    }
 
-	public boolean equals( LFXBinaryPath aBinaryPath)
-	{
-		if( aBinaryPath == null)
-		{
-			return false;
-		}
-		
-		if( !this.targetID.equals( aBinaryPath.targetID))
-		{
-			return false;
-		}
-		
-		if( !this.siteID.equals( aBinaryPath.siteID))
-		{
-			return false;
-		}
-		
-		return true;
-	}
+    public String getStringValue() {
+        return toString();
+    }
 
-	public static LFXBinaryPath getBroadcastBinaryPathWithSiteID( LFXSiteID siteID)
-	{
-		return getPathWithSiteIDAndTargetID( siteID, LFXBinaryTargetID.getBroadcastTargetID());
-	}
-	
-	public Object clone()
-	{
-		LFXBinaryPath newPath = new LFXBinaryPath();
-		newPath.siteID = this.siteID;
-		newPath.targetID = this.targetID;
-		return newPath;
-	}
+    public String toString() {
+        return siteID.toString() + "/" + targetID.toString();
+    }
+
+    public static LFXBinaryPath getPathWithSiteIDAndTargetID(LFXSiteID siteID, LFXBinaryTargetID targetID) {
+        LFXBinaryPath path = new LFXBinaryPath();
+        path.siteID = siteID;
+        path.targetID = targetID;
+        return path;
+    }
+
+    private LFXSiteID siteID;
+    private LFXBinaryTargetID targetID;
+
+    public LFXSiteID getSiteID() {
+        return siteID;
+    }
+
+    public LFXBinaryTargetID getBinaryTargetID() {
+        return targetID;
+    }
+
+    public String getDebugStringValue() {
+        return toString();
+    }
+
+    public boolean equals(LFXBinaryPath aBinaryPath) {
+        if (aBinaryPath == null) {
+            return false;
+        }
+
+        if (!this.targetID.equals(aBinaryPath.targetID)) {
+            return false;
+        }
+
+        if (!this.siteID.equals(aBinaryPath.siteID)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static LFXBinaryPath getBroadcastBinaryPathWithSiteID(LFXSiteID siteID) {
+        return getPathWithSiteIDAndTargetID(siteID, LFXBinaryTargetID.getBroadcastTargetID());
+    }
+
+    public Object clone() {
+        LFXBinaryPath newPath = new LFXBinaryPath();
+        newPath.siteID = this.siteID;
+        newPath.targetID = this.targetID;
+        return newPath;
+    }
 }
