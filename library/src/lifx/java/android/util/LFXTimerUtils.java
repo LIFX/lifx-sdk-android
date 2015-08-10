@@ -37,7 +37,7 @@ public class LFXTimerUtils {
 //    }
 
     public static Timer getTimerTaskWithPeriod(Runnable task, long period, boolean immediate, String name) {
-        LFXLog.d(TAG, "getTimerTaskWithPeriod() - " + name + ", " + period);
+        //LFXLog.d(TAG, "getTimerTaskWithPeriod() - " + name + ", " + period);
         Timer timer = new Timer();
         long delay = 0L;
 
