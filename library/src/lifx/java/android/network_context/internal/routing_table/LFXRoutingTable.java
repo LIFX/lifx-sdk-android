@@ -22,352 +22,296 @@ import lifx.java.android.entities.internal.LFXBinaryTargetID.TagField;
 import lifx.java.android.entities.internal.structle.LxProtocolDevice;
 import lifx.java.android.entities.internal.structle.LxProtocolLight;
 import lifx.java.android.entities.internal.structle.LxProtocol.Type;
+import lifx.java.android.util.LFXLog;
 
-public class LFXRoutingTable
-{
-	private HashMap<String,LFXDeviceMapping> mutableDeviceMappingsByDeviceID;
-	private ArrayList<LFXTagMapping> mutableTagMappings;
-	private ArrayList<LFXSiteID> mutableSiteIDs;	// Could be derived from DeviceMappings, but is cached separately for performance reasons
+public class LFXRoutingTable {
+    private final static String TAG = LFXRoutingTable.class.getSimpleName();
 
-	public LFXRoutingTable()
-	{
-		super();
-		mutableDeviceMappingsByDeviceID = new HashMap<String,LFXDeviceMapping>();
-		mutableTagMappings = new ArrayList<LFXTagMapping>();
-		mutableSiteIDs = new ArrayList<LFXSiteID>();
-	}
+    private HashMap<String, LFXDeviceMapping> mutableDeviceMappingsByDeviceID;
+    private ArrayList<LFXTagMapping> mutableTagMappings;
+    private ArrayList<LFXSiteID> mutableSiteIDs;    // Could be derived from DeviceMappings, but is cached separately for performance reasons
 
-	public ArrayList<LFXDeviceMapping> getDeviceMappings()
-	{
-		ArrayList<LFXDeviceMapping> mappings = new ArrayList<LFXDeviceMapping>();
-		mappings.addAll( mutableDeviceMappingsByDeviceID.values());
-		return mappings;
-	}
+    public LFXRoutingTable() {
+        super();
+        LFXLog.d(TAG, "LFXRoutingTable() - Constructor");
+        mutableDeviceMappingsByDeviceID = new HashMap<String, LFXDeviceMapping>();
+        mutableTagMappings = new ArrayList<LFXTagMapping>();
+        mutableSiteIDs = new ArrayList<LFXSiteID>();
+    }
 
-	public ArrayList<LFXTagMapping> getTagMappings()
-	{
-		ArrayList<LFXTagMapping> mappings = new ArrayList<LFXTagMapping>();
-		mappings.addAll( this.mutableTagMappings);
-		return mappings;
-	}
+    public ArrayList<LFXDeviceMapping> getDeviceMappings() {
+        ArrayList<LFXDeviceMapping> mappings = new ArrayList<LFXDeviceMapping>();
+        mappings.addAll(mutableDeviceMappingsByDeviceID.values());
+        return mappings;
+    }
 
-	public ArrayList<LFXSiteID> getSiteIDs()
-	{
-		ArrayList<LFXSiteID> siteIDs = new ArrayList<LFXSiteID>();
-		siteIDs.addAll( this.mutableSiteIDs);
-		return siteIDs;
-	}
+    public ArrayList<LFXTagMapping> getTagMappings() {
+        ArrayList<LFXTagMapping> mappings = new ArrayList<LFXTagMapping>();
+        mappings.addAll(this.mutableTagMappings);
+        return mappings;
+    }
 
-	public void updateMappingsFromMessage( LFXMessage message)
-	{
-		if( message.isAResponseMessage() == false) 
-		{
-			return;
-		}
-		
-		updateSiteID( message.getPath().getSiteID());
-		updateDeviceMappingWithDeviceIDSiteID( message.getPath().getBinaryTargetID().getStringValue(), message.getPath().getSiteID());
-		
-		if( message.getType() == Type.LX_PROTOCOL_LIGHT_STATE)
-		{
-			String path = message.getPath().getBinaryTargetID().getStringValue();
-			LFXSiteID siteID = message.getPath().getSiteID();
-			
-			LxProtocolLight.State payload = (LxProtocolLight.State) message.getPayload();
-			TagField tagField = new TagField();
-			tagField.tagData = payload.getTags().getBytes();
-			
-			updateDeviceMappingWithDeviceID( path, siteID, tagField);
-		}
-		
-		if( message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAGS)
-		{
-			String path = message.getPath().getBinaryTargetID().getStringValue();
-			LFXSiteID siteID = message.getPath().getSiteID();
-			
-			LxProtocolDevice.StateTags payload = (LxProtocolDevice.StateTags) message.getPayload();
-			TagField tagField = new TagField();
-			tagField.tagData = payload.getTags().getBytes();
-			
-			updateDeviceMappingWithDeviceID( path, siteID, tagField);
-		}
-		
-		if( message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAG_LABELS)
-		{
-			LFXSiteID siteID = message.getPath().getSiteID();
-			
-			LxProtocolDevice.StateTagLabels payload = (LxProtocolDevice.StateTagLabels) message.getPayload();
-			TagField tagField = new TagField();
-			tagField.tagData = payload.getTags().getBytes();
-			
-			ArrayList<TagField> singularTagFields = LFXBinaryTargetID.enumerateTagField( tagField);
-			
-			for( TagField aTagField : singularTagFields)
-			{
-				updateTagMappingWithTag( payload.getLabel(), siteID, aTagField);
-			}
-		}
-	}
+    public ArrayList<LFXSiteID> getSiteIDs() {
+        ArrayList<LFXSiteID> siteIDs = new ArrayList<LFXSiteID>();
+        siteIDs.addAll(this.mutableSiteIDs);
+        return siteIDs;
+    }
 
-	public void updateSiteID( LFXSiteID siteID)
-	{
-		if( mutableSiteIDs.contains( siteID))
-		{
-			return;
-		}
-		
-		mutableSiteIDs.add( siteID);
-	}
+    public void updateMappingsFromMessage(LFXMessage message) {
+        if (message.isAResponseMessage() == false) {
+            return;
+        }
 
-	public void updateDeviceMappingWithDeviceIDSiteID( String deviceID, LFXSiteID siteID)
-	{
-		LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID( deviceID);
-		
-		if( deviceMapping == null)
-		{
-			deviceMapping = new LFXDeviceMapping();
-			mutableDeviceMappingsByDeviceID.put( deviceID, deviceMapping);
-		}
-		
-		deviceMapping.setDeviceID( deviceID);
-		deviceMapping.setSiteID( siteID);
-	}
+        updateSiteID(message.getPath().getSiteID());
+        updateDeviceMappingWithDeviceIDSiteID(message.getPath().getBinaryTargetID().getStringValue(), message.getPath().getSiteID());
 
-	public void updateDeviceMappingWithDeviceID( String deviceID, LFXSiteID siteID, TagField tagField)
-	{
-		LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID( deviceID);
-		
-		if( deviceMapping == null)
-		{
-			deviceMapping = new LFXDeviceMapping();
-			mutableDeviceMappingsByDeviceID.put( deviceID, deviceMapping);
-		}
-		
-		deviceMapping.setDeviceID( deviceID);
-		deviceMapping.setSiteID( siteID);
-		deviceMapping.setTagField( tagField);
-	}
+        if (message.getType() == Type.LX_PROTOCOL_LIGHT_STATE) {
+            String path = message.getPath().getBinaryTargetID().getStringValue();
+            LFXSiteID siteID = message.getPath().getSiteID();
 
-	public void updateTagMappingWithTag( String tag, LFXSiteID siteID, TagField tagField)
-	{
-		if( siteID.isZeroSite()) 
-		{
-			return;
-		}
+            LxProtocolLight.State payload = (LxProtocolLight.State) message.getPayload();
+            TagField tagField = new TagField();
+            tagField.tagData = payload.getTags().getBytes();
 
-		LFXTagMapping tagMapping = getTagMappingForSiteIDAndTagField( siteID, tagField);
-		
-		if( tag.length() > 0)
-		{
-			if( tagMapping == null)
-			{
-				tagMapping = new LFXTagMapping();
-				mutableTagMappings.add( tagMapping);
-			}
-			
-			tagMapping.setTag( tag);
-			tagMapping.setSiteID( siteID);
-			tagMapping.setTagField( tagField);
-		}
-		else
-		{
-			if( tagMapping != null)
-			{
-				mutableTagMappings.remove( tagMapping);
-			}
-		}
-	}
+            updateDeviceMappingWithDeviceID(path, siteID, tagField);
+        }
 
-	public void resetRoutingTable()
-	{
-		mutableDeviceMappingsByDeviceID.clear();
-		mutableTagMappings.clear();
-		mutableSiteIDs.clear();
-	}
+        if (message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAGS) {
+            String path = message.getPath().getBinaryTargetID().getStringValue();
+            LFXSiteID siteID = message.getPath().getSiteID();
 
-	public ArrayList<String> getAllTags()
-	{
-		ArrayList<String> allTags = new ArrayList<String>();
-		
-		for( LFXTagMapping aTagMapping : mutableTagMappings)
-		{
-			allTags.add( aTagMapping.getTag());
-		}
-		
-		return allTags;
-	}
+            LxProtocolDevice.StateTags payload = (LxProtocolDevice.StateTags) message.getPayload();
+            TagField tagField = new TagField();
+            tagField.tagData = payload.getTags().getBytes();
 
-	@SuppressWarnings( "unchecked")
-	public ArrayList<LFXSiteID> getAllSiteIDs()
-	{
-		return (ArrayList<LFXSiteID>) mutableSiteIDs.clone();
-	}
+            updateDeviceMappingWithDeviceID(path, siteID, tagField);
+        }
 
-	public LFXDeviceMapping getDeviceMappingForDeviceID( String deviceID)
-	{
-		return mutableDeviceMappingsByDeviceID.get( deviceID);
-	}
+        if (message.getType() == Type.LX_PROTOCOL_DEVICE_STATE_TAG_LABELS) {
+            LFXSiteID siteID = message.getPath().getSiteID();
 
-	public ArrayList<LFXDeviceMapping> getDeviceMappingsForSiteID( LFXSiteID siteID)
-	{
-		ArrayList<LFXDeviceMapping> deviceMappings = new ArrayList<LFXDeviceMapping>();
-		
-		for( LFXDeviceMapping aDeviceMapping : mutableDeviceMappingsByDeviceID.values())
-		{
-			if( aDeviceMapping.getSiteID().equals( siteID))
-			{
-				deviceMappings.add( aDeviceMapping);
-			}
-		}
-		
-		return deviceMappings;
-	}
+            LxProtocolDevice.StateTagLabels payload = (LxProtocolDevice.StateTagLabels) message.getPayload();
+            TagField tagField = new TagField();
+            tagField.tagData = payload.getTags().getBytes();
 
-	public ArrayList<LFXDeviceMapping> getDeviceMappingsForSiteIDTagField( LFXSiteID siteID, TagField tagField)
-	{
-		ArrayList<LFXDeviceMapping> deviceMappings = new ArrayList<LFXDeviceMapping>();
-		
-		for( LFXDeviceMapping aDeviceMapping : mutableDeviceMappingsByDeviceID.values())
-		{
-			if( aDeviceMapping.getSiteID().equals( siteID) &&
-				aDeviceMapping.getTagField().equals( tagField))
-			{
-				deviceMappings.add( aDeviceMapping);
-			}
-		}
-		
-		return deviceMappings;
-	}
+            ArrayList<TagField> singularTagFields = LFXBinaryTargetID.enumerateTagField(tagField);
 
-	public LFXTagMapping getTagMappingForSiteIDAndTagField( LFXSiteID siteID, TagField tagField)
-	{
-		for( LFXTagMapping aTagMapping : mutableTagMappings)
-		{
-			if( aTagMapping.getSiteID().equals( siteID) &&
-				aTagMapping.getTagField().equals( tagField))
-			{
-				return aTagMapping;
-			}
-		}
-		
-		return null;
-	}
+            for (TagField aTagField : singularTagFields) {
+                updateTagMappingWithTag(payload.getLabel(), siteID, aTagField);
+            }
+        }
+    }
 
-	public ArrayList<LFXTagMapping> getTagMappingsForTag( String tag)
-	{
-		ArrayList<LFXTagMapping> tagMappings = new ArrayList<LFXTagMapping>();
-		
-		for( LFXTagMapping aTagMapping : mutableTagMappings)
-		{
-			if( aTagMapping.getTag().equals( tag))
-			{
-				tagMappings.add( aTagMapping);
-			}
-		}
-		
-		return tagMappings;
-	}
+    public void updateSiteID(LFXSiteID siteID) {
+        if (mutableSiteIDs.contains(siteID)) {
+            return;
+        }
 
-	public ArrayList<LFXBinaryPath> getBinaryPathsForTarget( LFXTarget target)
-	{
-		ArrayList<LFXBinaryPath> returnPaths = new ArrayList<LFXBinaryPath>();
-		
-		switch( target.getTargetType())
-		{
-			case BROADCAST:
-			{
-				for( LFXSiteID aSiteID : mutableSiteIDs)
-				{
-					LFXBinaryPath path = LFXBinaryPath.getPathWithSiteIDAndTargetID( aSiteID, LFXBinaryTargetID.getBroadcastTargetID());
-					returnPaths.add( path);
-				}
-				
-				break;
-			}
-			case DEVICE:
-			{
-				// If we know what site the device is in, send it there, otherwise
-				// send to each
-				LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID( target.getDeviceID());
-				
-				if( deviceMapping != null)
-				{
-					LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID( deviceMapping.getSiteID(), LFXBinaryTargetID.getDeviceTargetIDWithString( target.getDeviceID()));// targetID:[LFXBinaryTargetID deviceTargetIDWithString:target.deviceID]];
-					returnPaths.add( binaryPath);
-					break;
-				}
-				
-				for( LFXSiteID aSiteID : mutableSiteIDs)
-				{
-					LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID( aSiteID, LFXBinaryTargetID.getDeviceTargetIDWithString( target.getDeviceID()));
-					returnPaths.add( binaryPath);
-					// TODO: decide if to // break; here
-				}
-			}
-			case TAG:
-			{
-				// Look up the Tag Mappings
-				for( LFXTagMapping aTagMapping : getTagMappingsForTag( target.getTag()))
-				{
-					LFXBinaryTargetID targetID = LFXBinaryTargetID.getGroupTargetIDWithTagField( aTagMapping.getTagField());
-					LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID( aTagMapping.getSiteID(), targetID);
-					returnPaths.add( binaryPath);
-				}
-			}
-		}
-		
-		return returnPaths;
-	}
+        mutableSiteIDs.add(siteID);
+    }
 
-	public ArrayList<String> getDeviceIDsForBinaryPath( LFXBinaryPath binaryPath)
-	{
-		switch( binaryPath.getBinaryTargetID().getTargetType())
-		{
-			case BROADCAST:
-			{
-				ArrayList<String> deviceIds = new ArrayList<String>();
-				
-				for( LFXDeviceMapping aDeviceMapping : getDeviceMappingsForSiteID( binaryPath.getSiteID()))
-				{
-					deviceIds.add( aDeviceMapping.getDeviceId());
-				}
-				
-				return deviceIds;
-			}
-			case DEVICE:
-			{
-				ArrayList<String> deviceIds = new ArrayList<String>();
-				deviceIds.add( binaryPath.getBinaryTargetID().getStringValue());
-				return deviceIds;
-			}
-			case TAG:
-			{
-				ArrayList<String> deviceIds = new ArrayList<String>();
-				
-				for( LFXDeviceMapping aDeviceMapping : getDeviceMappingsForSiteIDTagField( binaryPath.getSiteID(), binaryPath.getBinaryTargetID().getGroupTagField()))
-				{
-					deviceIds.add( aDeviceMapping.getDeviceId());
-				}
-				
-				return deviceIds;				
-			}
-		}
-		
-		return new ArrayList<String>();
-	}
-	
-	public ArrayList<LFXTagMapping> getTagMappingsForSiteIDAndTag( LFXSiteID siteID, String tag)
-	{
-		ArrayList<LFXTagMapping> mappings = new ArrayList<LFXTagMapping>();
-		
-		for( LFXTagMapping aMapping : mutableTagMappings)
-		{
-			if( aMapping.getSiteID().equals( siteID) && aMapping.getTag().equals( tag))	
-			{
-				mappings.add( aMapping);
-			}
-		}
-		
-		return mappings;
-	}
+    public void updateDeviceMappingWithDeviceIDSiteID(String deviceID, LFXSiteID siteID) {
+        LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID(deviceID);
+
+        if (deviceMapping == null) {
+            deviceMapping = new LFXDeviceMapping();
+            mutableDeviceMappingsByDeviceID.put(deviceID, deviceMapping);
+        }
+
+        deviceMapping.setDeviceID(deviceID);
+        deviceMapping.setSiteID(siteID);
+    }
+
+    public void updateDeviceMappingWithDeviceID(String deviceID, LFXSiteID siteID, TagField tagField) {
+        LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID(deviceID);
+
+        if (deviceMapping == null) {
+            deviceMapping = new LFXDeviceMapping();
+            mutableDeviceMappingsByDeviceID.put(deviceID, deviceMapping);
+        }
+
+        deviceMapping.setDeviceID(deviceID);
+        deviceMapping.setSiteID(siteID);
+        deviceMapping.setTagField(tagField);
+    }
+
+    public void updateTagMappingWithTag(String tag, LFXSiteID siteID, TagField tagField) {
+        if (siteID.isZeroSite()) {
+            return;
+        }
+
+        LFXTagMapping tagMapping = getTagMappingForSiteIDAndTagField(siteID, tagField);
+
+        if (tag.length() > 0) {
+            if (tagMapping == null) {
+                tagMapping = new LFXTagMapping();
+                mutableTagMappings.add(tagMapping);
+            }
+
+            tagMapping.setTag(tag);
+            tagMapping.setSiteID(siteID);
+            tagMapping.setTagField(tagField);
+        } else {
+            if (tagMapping != null) {
+                mutableTagMappings.remove(tagMapping);
+            }
+        }
+    }
+
+    public void resetRoutingTable() {
+        mutableDeviceMappingsByDeviceID.clear();
+        mutableTagMappings.clear();
+        mutableSiteIDs.clear();
+    }
+
+    public ArrayList<String> getAllTags() {
+        ArrayList<String> allTags = new ArrayList<String>();
+
+        for (LFXTagMapping aTagMapping : mutableTagMappings) {
+            allTags.add(aTagMapping.getTag());
+        }
+
+        return allTags;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<LFXSiteID> getAllSiteIDs() {
+        return (ArrayList<LFXSiteID>) mutableSiteIDs.clone();
+    }
+
+    public LFXDeviceMapping getDeviceMappingForDeviceID(String deviceID) {
+        return mutableDeviceMappingsByDeviceID.get(deviceID);
+    }
+
+    public ArrayList<LFXDeviceMapping> getDeviceMappingsForSiteID(LFXSiteID siteID) {
+        ArrayList<LFXDeviceMapping> deviceMappings = new ArrayList<LFXDeviceMapping>();
+
+        for (LFXDeviceMapping aDeviceMapping : mutableDeviceMappingsByDeviceID.values()) {
+            if (aDeviceMapping.getSiteID().equals(siteID)) {
+                deviceMappings.add(aDeviceMapping);
+            }
+        }
+
+        return deviceMappings;
+    }
+
+    public ArrayList<LFXDeviceMapping> getDeviceMappingsForSiteIDTagField(LFXSiteID siteID, TagField tagField) {
+        ArrayList<LFXDeviceMapping> deviceMappings = new ArrayList<LFXDeviceMapping>();
+
+        for (LFXDeviceMapping aDeviceMapping : mutableDeviceMappingsByDeviceID.values()) {
+            if (aDeviceMapping.getSiteID().equals(siteID) &&
+                    aDeviceMapping.getTagField().equals(tagField)) {
+                deviceMappings.add(aDeviceMapping);
+            }
+        }
+
+        return deviceMappings;
+    }
+
+    public LFXTagMapping getTagMappingForSiteIDAndTagField(LFXSiteID siteID, TagField tagField) {
+        for (LFXTagMapping aTagMapping : mutableTagMappings) {
+            if (aTagMapping.getSiteID().equals(siteID) &&
+                    aTagMapping.getTagField().equals(tagField)) {
+                return aTagMapping;
+            }
+        }
+
+        return null;
+    }
+
+    public ArrayList<LFXTagMapping> getTagMappingsForTag(String tag) {
+        ArrayList<LFXTagMapping> tagMappings = new ArrayList<LFXTagMapping>();
+
+        for (LFXTagMapping aTagMapping : mutableTagMappings) {
+            if (aTagMapping.getTag().equals(tag)) {
+                tagMappings.add(aTagMapping);
+            }
+        }
+
+        return tagMappings;
+    }
+
+    public ArrayList<LFXBinaryPath> getBinaryPathsForTarget(LFXTarget target) {
+        ArrayList<LFXBinaryPath> returnPaths = new ArrayList<LFXBinaryPath>();
+
+        switch (target.getTargetType()) {
+            case BROADCAST: {
+                for (LFXSiteID aSiteID : mutableSiteIDs) {
+                    LFXBinaryPath path = LFXBinaryPath.getPathWithSiteIDAndTargetID(aSiteID, LFXBinaryTargetID.getBroadcastTargetID());
+                    returnPaths.add(path);
+                }
+
+                break;
+            }
+            case DEVICE: {
+                // If we know what site the device is in, send it there, otherwise
+                // send to each
+                LFXDeviceMapping deviceMapping = getDeviceMappingForDeviceID(target.getDeviceID());
+
+                if (deviceMapping != null) {
+                    LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID(deviceMapping.getSiteID(), LFXBinaryTargetID.getDeviceTargetIDWithString(target.getDeviceID()));// targetID:[LFXBinaryTargetID deviceTargetIDWithString:target.deviceID]];
+                    returnPaths.add(binaryPath);
+                    break;
+                }
+
+                for (LFXSiteID aSiteID : mutableSiteIDs) {
+                    LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID(aSiteID, LFXBinaryTargetID.getDeviceTargetIDWithString(target.getDeviceID()));
+                    returnPaths.add(binaryPath);
+                    // TODO: decide if to // break; here
+                }
+            }
+            case TAG: {
+                // Look up the Tag Mappings
+                for (LFXTagMapping aTagMapping : getTagMappingsForTag(target.getTag())) {
+                    LFXBinaryTargetID targetID = LFXBinaryTargetID.getGroupTargetIDWithTagField(aTagMapping.getTagField());
+                    LFXBinaryPath binaryPath = LFXBinaryPath.getPathWithSiteIDAndTargetID(aTagMapping.getSiteID(), targetID);
+                    returnPaths.add(binaryPath);
+                }
+            }
+        }
+
+        return returnPaths;
+    }
+
+    public ArrayList<String> getDeviceIDsForBinaryPath(LFXBinaryPath binaryPath) {
+        switch (binaryPath.getBinaryTargetID().getTargetType()) {
+            case BROADCAST: {
+                ArrayList<String> deviceIds = new ArrayList<String>();
+
+                for (LFXDeviceMapping aDeviceMapping : getDeviceMappingsForSiteID(binaryPath.getSiteID())) {
+                    deviceIds.add(aDeviceMapping.getDeviceId());
+                }
+
+                return deviceIds;
+            }
+            case DEVICE: {
+                ArrayList<String> deviceIds = new ArrayList<String>();
+                deviceIds.add(binaryPath.getBinaryTargetID().getStringValue());
+                return deviceIds;
+            }
+            case TAG: {
+                ArrayList<String> deviceIds = new ArrayList<String>();
+
+                for (LFXDeviceMapping aDeviceMapping : getDeviceMappingsForSiteIDTagField(binaryPath.getSiteID(), binaryPath.getBinaryTargetID().getGroupTagField())) {
+                    deviceIds.add(aDeviceMapping.getDeviceId());
+                }
+
+                return deviceIds;
+            }
+        }
+
+        return new ArrayList<String>();
+    }
+
+    public ArrayList<LFXTagMapping> getTagMappingsForSiteIDAndTag(LFXSiteID siteID, String tag) {
+        ArrayList<LFXTagMapping> mappings = new ArrayList<LFXTagMapping>();
+
+        for (LFXTagMapping aMapping : mutableTagMappings) {
+            if (aMapping.getSiteID().equals(siteID) && aMapping.getTag().equals(tag)) {
+                mappings.add(aMapping);
+            }
+        }
+
+        return mappings;
+    }
 }

@@ -8,61 +8,33 @@
 
 package lifx.java.android.util;
 
-public class LFXLog
-{
-	private static boolean info = true;
-	private static boolean error = true;
-	private static boolean warning = true;
-	private static boolean verbose = false;
-	private static boolean debug = false;
-	
-	public static void info( String input)
-	{
-		if( info)
-		{
-			System.out.println( "Error: " + input);
-		}
-	}
-	
-	public static void error( String input)
-	{
-		if( error)
-		{
-			System.out.println( "Error: " + input);
-		}
-	}
-	
-	public static void warn( String input)
-	{
-		if( warning)
-		{
-			System.out.println( "Warning: " + input);
-		}
-	}
-	
-	public static void verbose( String input)
-	{
-		if( verbose)
-		{
-			System.out.println( "Verbose: " + input);
-		}
-	}
-	
-	public static void debug( String input)
-	{
-		if( debug)
-		{
-			System.out.println( "Debug: " + input);
-		}
-	}
-	
-	public static void LFXMessage( byte[] data)
-	{
-		System.out.println( "Size: " + data.length);
-		
-		for( int i = 0; i < data.length; i++)
-		{
-			System.out.printf( "0x%02X ", data[i]);
-		}
-	}
+import android.util.Log;
+
+public class LFXLog {
+    private static boolean info = true;
+    private static boolean error = true;
+    private static boolean warning = true;
+    private static boolean verbose = true;
+    private static boolean debug = true;
+
+    public static void i(String tag, String input) {
+        if (info) Log.i(tag, input);
+    }
+
+    public static void e(String tag, String input) {
+        if (error) Log.e(tag, input);
+    }
+
+    public static void w(String tag, String input) {
+        if (warning) Log.w(tag, input);
+    }
+
+    public static void v(String tag, String input) {
+        if (verbose) Log.v(tag, input);
+    }
+
+    public static void d(String tag, String input) {
+        if (debug) Log.d(tag, input);
+    }
+
 }

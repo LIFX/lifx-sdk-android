@@ -21,54 +21,45 @@ import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 
-public class LFXNetworkUtils
-{
-	@SuppressLint( "DefaultLocale")
-	public static String getLocalHostAddress() 
-	{
-		boolean useIPv4 = true;
-		
-        try 
-        {
+public class LFXNetworkUtils {
+    private final static String TAG = LFXNetworkUtils.class.getSimpleName();
+
+    @SuppressLint("DefaultLocale")
+    public static String getLocalHostAddress() {
+        boolean useIPv4 = true;
+
+        try {
             List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface intf : interfaces) 
-            {
+            for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
-                for (InetAddress addr : addrs) 
-                {
-                    if (!addr.isLoopbackAddress()) 
-                    {
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
                         String sAddr = addr.getHostAddress().toUpperCase();
-                        boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr); 
-                        if (useIPv4) 
-                        {
-                            if (isIPv4) 
-                            {
+                        boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
+                        if (useIPv4) {
+                            if (isIPv4) {
                                 return sAddr;
                             }
-                        } 
-                        else 
-                        {
-                            if (!isIPv4) 
-                            {
+                        } else {
+                            if (!isIPv4) {
                                 int delim = sAddr.indexOf('%'); // drop ip6 port suffix
-                                return delim<0 ? sAddr : sAddr.substring(0, delim);
+                                return delim < 0 ? sAddr : sAddr.substring(0, delim);
                             }
                         }
                     }
                 }
             }
-        } 
-        catch (Exception ex) { } // for now eat exceptions
+        } catch (Exception ex) {
+        } // for now eat exceptions
         return "";
     }
-	
-	
+
+
 //	public static String getBroadcastAddress()
 //	{
 //		return "255.255.255.255";
 //	}
-	
+
 //	public static String getBroadcastAddress()
 //	{
 //	    String found_bcast_address = null;
@@ -112,37 +103,31 @@ public class LFXNetworkUtils
 //
 //	     return found_bcast_address;
 //	}
-	
-	public static String getBroadcastAddress( Context context)
-	{
-	    WifiManager wifi = (WifiManager) context.getSystemService( Context.WIFI_SERVICE);
-	    DhcpInfo dhcp = wifi.getDhcpInfo();
 
-	    int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
-	    byte[] quads = new byte[4];
-	    for (int k = 0; k < 4; k++)
-	      quads[k] = (byte) (broadcast >> (k * 8));
-	    try
-		{
-			return InetAddress.getByAddress(quads).getHostAddress();
-		} 
-	    catch( UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
-	    
-	    return "255.255.255.255";
-	}
-	
-	public static String getIPv4StringByStrippingIPv6Prefix( String in)
-	{
-		String ipv6Prefix = "::ffff:";
-		
-		if( in.startsWith( ipv6Prefix)) 
-		{
-			return in.substring( ipv6Prefix.length(), in.length());
-		}
-		
-		return in;
-	}
+    public static String getBroadcastAddress(Context context) {
+        WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo dhcp = wifi.getDhcpInfo();
+
+        int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
+        byte[] quads = new byte[4];
+        for (int k = 0; k < 4; k++)
+            quads[k] = (byte) (broadcast >> (k * 8));
+        try {
+            return InetAddress.getByAddress(quads).getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        return "255.255.255.255";
+    }
+
+    public static String getIPv4StringByStrippingIPv6Prefix(String in) {
+        String ipv6Prefix = "::ffff:";
+
+        if (in.startsWith(ipv6Prefix)) {
+            return in.substring(ipv6Prefix.length(), in.length());
+        }
+
+        return in;
+    }
 }

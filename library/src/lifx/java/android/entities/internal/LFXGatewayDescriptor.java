@@ -12,122 +12,103 @@ import lifx.java.android.entities.internal.structle.LxProtocolDevice;
 import lifx.java.android.entities.internal.structle.LxProtocolDevice.Service;
 import lifx.java.android.internal.LFXWiFiObserver;
 
-public class LFXGatewayDescriptor
-{
-	public static LFXGatewayDescriptor getGatewayDescriptorWithHostPortPathService( String host, int port, LFXBinaryPath path, LxProtocolDevice.Service service)
-	{
-		LFXGatewayDescriptor gatewayDescriptor = new LFXGatewayDescriptor();
-		gatewayDescriptor.host = host;
-		gatewayDescriptor.port = port;
-		gatewayDescriptor.path = path;
-		gatewayDescriptor.service = service;
-		return gatewayDescriptor;
-	}
+public class LFXGatewayDescriptor {
+    private String host;
+    private int port;
+    private LFXBinaryPath path;
+    private LxProtocolDevice.Service service;
 
-	public static LFXGatewayDescriptor getBroadcastGatewayDescriptor()
-	{
-		return getGatewayDescriptorWithHostPortPathService( LFXWiFiObserver.getWiFiBroadcastAddress(), 56700, null, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
-	}
+    public LFXGatewayDescriptor() {
 
-	public static LFXGatewayDescriptor getClientPeerToPeerGatewayDescriptor()
-	{
-		return getGatewayDescriptorWithHostPortPathService( LFXWiFiObserver.getWiFiBroadcastAddress(), 56750, null, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
-	}
-	
-	public static LFXGatewayDescriptor getSoftAPGatewayDescriptor()
-	{
-		return getGatewayDescriptorWithHostPortPathService( "172.16.0.1", 56700, null, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
-	}
+    }
 
-	public boolean isBroadcastGateway()
-	{
-		return this.equals( getBroadcastGatewayDescriptor());
-	}
-	
-	public boolean isClientPeerToPeerGateway()
-	{
-		return this.equals( getClientPeerToPeerGatewayDescriptor());
-	}
-	
-	public boolean isSoftAPGateway()
-	{
-		return this.equals( getSoftAPGatewayDescriptor());
-	}
+    public static LFXGatewayDescriptor getGatewayDescriptorWithHostPortPathService(String host, int port, LFXBinaryPath path, LxProtocolDevice.Service service) {
+        LFXGatewayDescriptor gatewayDescriptor = new LFXGatewayDescriptor();
+        gatewayDescriptor.host = host;
+        gatewayDescriptor.port = port;
+        gatewayDescriptor.path = path;
+        gatewayDescriptor.service = service;
+        return gatewayDescriptor;
+    }
 
-	private String host;
-	private int port;
-	private LFXBinaryPath path;
-	private LxProtocolDevice.Service service;
+    public static LFXGatewayDescriptor getBroadcastGatewayDescriptor() {
+        return getGatewayDescriptorWithHostPortPathService(LFXWiFiObserver.getWiFiBroadcastAddress(), 56700, null, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
+    }
 
-	public String getHost()
-	{
-		return host;
-	}
-	
-	public int getPort()
-	{
-		return port;
-	}
-	
-	public LFXBinaryPath getPath()
-	{
-		return path;
-	}
-	
-	public LxProtocolDevice.Service getService()
-	{
-		return service;
-	}
+    public static LFXGatewayDescriptor getClientPeerToPeerGatewayDescriptor() {
+        return getGatewayDescriptorWithHostPortPathService(LFXWiFiObserver.getWiFiBroadcastAddress(), 56750, null, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
+    }
 
-	public String getProtocolString()
-	{
-		return service.toString();
-	}
+    public static LFXGatewayDescriptor getSoftAPGatewayDescriptor() {
+        return getGatewayDescriptorWithHostPortPathService("172.16.0.1", 56700, null, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
+    }
 
-	public String toString()
-	{
-		if( path != null)
-		{
-			return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path.toString() + ", Protocol: " + getProtocolString();
-		}
-		else
-		{
-			return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path + ", Protocol: " + getProtocolString();
-		}
-	}
+    public boolean isBroadcastGateway() {
+        return this.equals(getBroadcastGatewayDescriptor());
+    }
 
-	public boolean equals( LFXGatewayDescriptor aGatewayDescriptor)
-	{
-		if( aGatewayDescriptor == null)
-		{
-			return false;
-		}
-		
-		if( !aGatewayDescriptor.getHost().equals( this.host)) 
-		{
-			return false;
-		}
-		
-		if( aGatewayDescriptor.getPort() != this.port) 
-		{
-			return false;
-		}
-		
-		if( aGatewayDescriptor.getService() != this.service)
-		{
-			return false;
-		}
-		
-		return true;
-	}
+    public boolean isClientPeerToPeerGateway() {
+        return this.equals(getClientPeerToPeerGatewayDescriptor());
+    }
 
-	public Object clone()
-	{
-		LFXGatewayDescriptor newGatewayDescriptor = new LFXGatewayDescriptor();
-		newGatewayDescriptor.host = this.host;
-		newGatewayDescriptor.port = this.port;
-		newGatewayDescriptor.path = this.path;
-		newGatewayDescriptor.service = this.service;
-		return newGatewayDescriptor;
-	}
+    public boolean isSoftAPGateway() {
+        return this.equals(getSoftAPGatewayDescriptor());
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public LFXBinaryPath getPath() {
+        return path;
+    }
+
+    public LxProtocolDevice.Service getService() {
+        return service;
+    }
+
+    public String getProtocolString() {
+        return (service != null) ? service.toString() : "(Service was null!)";
+    }
+
+    public String toString() {
+        if (path != null) {
+            return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path.toString() + ", Protocol: " + getProtocolString();
+        } else {
+            return "LFXGatewayDescriptor - Host: " + host + ", Port: " + port + ", Path: " + path + ", Protocol: " + getProtocolString();
+        }
+    }
+
+    public boolean equals(LFXGatewayDescriptor aGatewayDescriptor) {
+        if (aGatewayDescriptor == null) {
+            return false;
+        }
+
+        if (!aGatewayDescriptor.getHost().equals(this.host)) {
+            return false;
+        }
+
+        if (aGatewayDescriptor.getPort() != this.port) {
+            return false;
+        }
+
+        if (aGatewayDescriptor.getService() != this.service) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public Object clone() {
+        LFXGatewayDescriptor newGatewayDescriptor = new LFXGatewayDescriptor();
+        newGatewayDescriptor.host = this.host;
+        newGatewayDescriptor.port = this.port;
+        newGatewayDescriptor.path = this.path;
+        newGatewayDescriptor.service = this.service;
+        return newGatewayDescriptor;
+    }
 }

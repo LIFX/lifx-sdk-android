@@ -20,185 +20,163 @@ import lifx.java.android.entities.internal.structle.LxProtocolDevice;
 import lifx.java.android.entities.internal.structle.LxProtocol.Type;
 import lifx.java.android.entities.internal.structle.LxProtocolDevice.Service;
 import lifx.java.android.network_context.internal.transport_manager.lan.LFXLANTransportManager;
+import lifx.java.android.util.LFXLog;
 import lifx.java.android.util.LFXTimerUtils;
 
-public class LFXGatewayDiscoveryController
-{
-	public enum LFXGatewayDiscoveryMode
-	{
-		NORMAL,				// 30 seconds
-		ACTIVELY_SEARCHING,	// 1 second
-	};
+public class LFXGatewayDiscoveryController {
+    private final static String TAG = LFXGatewayDiscoveryController.class.getSimpleName();
 
-	private LFXGatewayDiscoveryControllerListener listener;
-	private boolean ended = false;
+    public enum LFXGatewayDiscoveryMode {
+        NORMAL,                // 30 seconds
+        ACTIVELY_SEARCHING,    // 1 second
+    }
 
-	// This property will change how often DeviceGetPanGateway messages are broadcast
-	private LFXGatewayDiscoveryMode discoveryMode;
-	
-	public static LFXGatewayDiscoveryController getGatewayDiscoveryControllerWithLANTransportManager( LFXLANTransportManager transportManager, LFXGatewayDiscoveryControllerListener listener)
-	{
-		LFXGatewayDiscoveryController discoveryTable = new LFXGatewayDiscoveryController();
-		discoveryTable.table = new ArrayList<LFXGatewayDiscoveryTableEntry>();
-		discoveryTable.transportManager = transportManager;
-		discoveryTable.listener = listener;
-		
-		discoveryTable.transportManager.addMessageObserverObjectWithCallback( discoveryTable, new LFXMessageObserverCallback()
-		{
-			@Override
-			public void run( Object context, LFXMessage message)
-			{
-				LFXGatewayDiscoveryController discoveryTable = (LFXGatewayDiscoveryController) context;
-				
-				if( message.getType() != Type.LX_PROTOCOL_DEVICE_STATE_PAN_GATEWAY) 
-				{
-					return;
-				}
-				
-				discoveryTable.handleStatePANGatewayMessage( message);
-			}
-		});
-		
-		discoveryTable.discoveryMode = LFXGatewayDiscoveryMode.NORMAL;
-		discoveryTable.configureTimerForDiscoveryMode( discoveryTable.discoveryMode);
-		return discoveryTable;
-	}
+    ;
 
-	public interface LFXGatewayDiscoveryControllerListener
-	{
-		public void gatewayDiscoveryControllerDidUpdateEntry( LFXGatewayDiscoveryController table, LFXGatewayDiscoveryTableEntry tableEntry, boolean entryIsNew);
-	}
-	
-	private Timer discoveryTimer;
+    private LFXGatewayDiscoveryControllerListener listener;
+    private boolean ended = false;
 
-	private LFXLANTransportManager transportManager;
-	private ArrayList<LFXGatewayDiscoveryTableEntry> table;
+    // This property will change how often DeviceGetPanGateway messages are broadcast
+    private LFXGatewayDiscoveryMode discoveryMode;
 
-	@SuppressWarnings( { "unchecked", "unused" })
-	private ArrayList<LFXGatewayDiscoveryTableEntry> getAllGatewayDiscoveryTableEntries()
-	{
-		return (ArrayList<LFXGatewayDiscoveryTableEntry>) table.clone();
-	}
+    public static LFXGatewayDiscoveryController getGatewayDiscoveryControllerWithLANTransportManager(LFXLANTransportManager transportManager, LFXGatewayDiscoveryControllerListener listener) {
+        LFXLog.d(TAG, "LFXGatewayDiscoveryController() - Static constructor");
+        LFXGatewayDiscoveryController discoveryTable = new LFXGatewayDiscoveryController();
+        discoveryTable.table = new ArrayList<LFXGatewayDiscoveryTableEntry>();
+        discoveryTable.transportManager = transportManager;
+        discoveryTable.listener = listener;
 
-	public void removeAllGatewayDiscoveryTableEntries()
-	{
-		table.clear();
-	}
+        discoveryTable.transportManager.addMessageObserverObjectWithCallback(discoveryTable, new LFXMessageObserverCallback() {
+            @Override
+            public void run(Object context, LFXMessage message) {
+                LFXGatewayDiscoveryController discoveryTable = (LFXGatewayDiscoveryController) context;
 
-	public void handleStatePANGatewayMessage( LFXMessage statePanGateway)
-	{
-		LxProtocolDevice.StatePanGateway statePanGatewayPayload = (LxProtocolDevice.StatePanGateway) statePanGateway.getPayload();
-		
-		String host = statePanGateway.getSourceNetworkHost();
-		int port = (int) statePanGatewayPayload.getPort().getValue();
-		LFXBinaryPath path = statePanGateway.getPath();
-		Service service = LxProtocolDevice.serviceMap.get( statePanGatewayPayload.getService().getValue());
-		
-		// TODO: remove to enable TCP
-		if( service == Service.LX_PROTOCOL_DEVICE_SERVICE_TCP)
-		{
-			return;
-		}
-		
-		LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService( host, port, path, service);
-		
-		LFXGatewayDiscoveryTableEntry tableEntry = null;
-		
-		for( LFXGatewayDiscoveryTableEntry anEntry : table)
-		{
-			if( anEntry.getGatewayDescriptor().equals( gatewayDescriptor))
-			{
-				tableEntry = anEntry;
-				break;
-			}
-		}
-		
-		if( tableEntry != null)
-		{
-			tableEntry.setLastDiscoveryResponseDate( statePanGateway.getTimestamp());
-			listener.gatewayDiscoveryControllerDidUpdateEntry( this, tableEntry, false);
-		}
-		else
-		{
-			tableEntry = new LFXGatewayDiscoveryTableEntry();
-			tableEntry.setGatewayDescriptor( gatewayDescriptor);
-			tableEntry.setLastDiscoveryResponseDate( statePanGateway.getTimestamp());
-			table.add( tableEntry);
-			listener.gatewayDiscoveryControllerDidUpdateEntry( this, tableEntry, true);
-		}
-	}
+                if (message.getType() != Type.LX_PROTOCOL_DEVICE_STATE_PAN_GATEWAY) {
+                    return;
+                }
 
-	public void sendGatewayDiscoveryMessage()
-	{
-		LFXMessage getPANGateway = LFXMessage.messageWithType( Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY);
-		transportManager.sendBroadcastUDPMessage( getPANGateway);
-	}
+                discoveryTable.handleStatePANGatewayMessage(message);
+            }
+        });
 
-	public void setDiscoveryMode( LFXGatewayDiscoveryMode discoveryMode)
-	{
-		if( this.discoveryMode == discoveryMode) 
-		{
-			return;
-		}
-		this.discoveryMode = discoveryMode;
-		configureTimerForDiscoveryMode( discoveryMode);
-	}
+        discoveryTable.discoveryMode = LFXGatewayDiscoveryMode.NORMAL;
+        discoveryTable.configureTimerForDiscoveryMode(discoveryTable.discoveryMode);
+        return discoveryTable;
+    }
 
-	private Runnable getDiscoverTimerTask() 
-	{
-		Runnable discoverTimerTask = new TimerTask() 
-		{
-		    public void run() 
-		    {
-		    	discoveryTimerDidFire();
-		    }
-		};
-		
-		return discoverTimerTask;
-	}
-	
-	public void configureTimerForDiscoveryMode( LFXGatewayDiscoveryMode discoveryMode)
-	{
-		System.out.println( "DISCOVERYMODE: " + discoveryMode);
-		
-		long duration = 1000;
-		switch( discoveryMode)
-		{
-			case NORMAL:
-				duration = 30000;
-				break;
-			case ACTIVELY_SEARCHING:
-				duration = 1000;
-				break;
-		}
-		
-		if( discoveryTimer != null)
-		{
-			discoveryTimer.cancel();
-			discoveryTimer.purge();
-		}
+    public interface LFXGatewayDiscoveryControllerListener {
+        public void gatewayDiscoveryControllerDidUpdateEntry(LFXGatewayDiscoveryController table, LFXGatewayDiscoveryTableEntry tableEntry, boolean entryIsNew);
+    }
 
-		System.out.println( "Making Discovery Timer task. Period: " + duration);
-		discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod( getDiscoverTimerTask(), duration, false);
-	}
+    private Timer discoveryTimer;
 
-	public void discoveryTimerDidFire()
-	{
-		if( !ended)
-		{
-			sendGatewayDiscoveryMessage();
-		}
-	}
-	
-	public void shutDown()
-	{
-		if( discoveryTimer != null)
-		{
-			discoveryTimer.cancel();
-			discoveryTimer.purge();
-		}
-		
-		ended = true;
-	}
+    private LFXLANTransportManager transportManager;
+    private ArrayList<LFXGatewayDiscoveryTableEntry> table;
+
+    @SuppressWarnings({"unchecked", "unused"})
+    private ArrayList<LFXGatewayDiscoveryTableEntry> getAllGatewayDiscoveryTableEntries() {
+        return (ArrayList<LFXGatewayDiscoveryTableEntry>) table.clone();
+    }
+
+    public void removeAllGatewayDiscoveryTableEntries() {
+        table.clear();
+    }
+
+    public void handleStatePANGatewayMessage(LFXMessage statePanGateway) {
+        LxProtocolDevice.StatePanGateway statePanGatewayPayload = (LxProtocolDevice.StatePanGateway) statePanGateway.getPayload();
+
+        String host = statePanGateway.getSourceNetworkHost();
+        int port = (int) statePanGatewayPayload.getPort().getValue();
+        LFXBinaryPath path = statePanGateway.getPath();
+        Service service = LxProtocolDevice.serviceMap.get(statePanGatewayPayload.getService().getValue());
+
+        // TODO: remove to enable TCP
+        if (service == Service.LX_PROTOCOL_DEVICE_SERVICE_TCP) {
+            LFXLog.e(TAG, "handleStatePANGatewayMessage() - TCP Protocol unsupported");
+            return;
+        }
+
+        LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService(host, port, path, service);
+
+        LFXGatewayDiscoveryTableEntry tableEntry = null;
+
+        for (LFXGatewayDiscoveryTableEntry anEntry : table) {
+            if (anEntry.getGatewayDescriptor().equals(gatewayDescriptor)) {
+                tableEntry = anEntry;
+                break;
+            }
+        }
+
+        if (tableEntry != null) {
+            tableEntry.setLastDiscoveryResponseDate(statePanGateway.getTimestamp());
+            listener.gatewayDiscoveryControllerDidUpdateEntry(this, tableEntry, false);
+        } else {
+            tableEntry = new LFXGatewayDiscoveryTableEntry();
+            tableEntry.setGatewayDescriptor(gatewayDescriptor);
+            tableEntry.setLastDiscoveryResponseDate(statePanGateway.getTimestamp());
+            table.add(tableEntry);
+            listener.gatewayDiscoveryControllerDidUpdateEntry(this, tableEntry, true);
+        }
+    }
+
+    public void sendGatewayDiscoveryMessage() {
+        LFXMessage getPANGateway = LFXMessage.messageWithType(Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY);
+        transportManager.sendBroadcastUDPMessage(getPANGateway);
+    }
+
+    public void setDiscoveryMode(LFXGatewayDiscoveryMode discoveryMode) {
+        if (this.discoveryMode == discoveryMode) {
+            return;
+        }
+        this.discoveryMode = discoveryMode;
+        configureTimerForDiscoveryMode(discoveryMode);
+    }
+
+    private Runnable getDiscoverTimerTask() {
+        Runnable discoverTimerTask = new TimerTask() {
+            public void run() {
+                discoveryTimerDidFire();
+            }
+        };
+
+        return discoverTimerTask;
+    }
+
+    public void configureTimerForDiscoveryMode(LFXGatewayDiscoveryMode discoveryMode) {
+        LFXLog.d(TAG, "DISCOVERYMODE: " + discoveryMode);
+
+        long duration = 1000;
+        switch (discoveryMode) {
+            case NORMAL:
+                duration = 30000;
+                break;
+            case ACTIVELY_SEARCHING:
+                duration = 1000;
+                break;
+        }
+
+        if (discoveryTimer != null) {
+            discoveryTimer.cancel();
+            discoveryTimer.purge();
+        }
+
+        LFXLog.d(TAG, "Making Discovery Timer task. Period: " + duration);
+        discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod(getDiscoverTimerTask(), duration, false, "DisoveryTimer");
+    }
+
+    public void discoveryTimerDidFire() {
+        if (!ended) {
+            sendGatewayDiscoveryMessage();
+        }
+    }
+
+    public void shutDown() {
+        if (discoveryTimer != null) {
+            discoveryTimer.cancel();
+            discoveryTimer.purge();
+        }
+
+        ended = true;
+    }
 }
 
