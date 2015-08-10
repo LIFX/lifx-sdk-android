@@ -103,9 +103,13 @@ public class LFXRoutingTable {
     }
 
     public void updateSiteID(LFXSiteID siteID) {
-        if (mutableSiteIDs.contains(siteID)) {
-            return;
+
+        for(LFXSiteID siteTest:mutableSiteIDs) {
+            if(siteTest.equals(siteID)) return;
         }
+//        if (mutableSiteIDs.contains(siteID)) {
+//            return;
+//        }
 
         mutableSiteIDs.add(siteID);
     }
@@ -199,8 +203,7 @@ public class LFXRoutingTable {
         ArrayList<LFXDeviceMapping> deviceMappings = new ArrayList<LFXDeviceMapping>();
 
         for (LFXDeviceMapping aDeviceMapping : mutableDeviceMappingsByDeviceID.values()) {
-            if (aDeviceMapping.getSiteID().equals(siteID) &&
-                    aDeviceMapping.getTagField().equals(tagField)) {
+            if (aDeviceMapping.getSiteID().equals(siteID) && aDeviceMapping.getTagField().equals(tagField)) {
                 deviceMappings.add(aDeviceMapping);
             }
         }

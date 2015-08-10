@@ -69,10 +69,16 @@ public class LFXSocketUDP extends LFXSocketGeneric {
                     if (!dataGramSocket.isClosed()) {
                         dataGramSocket.send(udpPacket);
                     }
-                } catch (Exception e) {
+
+                }
+                catch (Exception e) {
                     e.printStackTrace();
                     close();
                 }
+                finally {
+                    dataGramSocket.close();
+                }
+
             }
         }
     }
