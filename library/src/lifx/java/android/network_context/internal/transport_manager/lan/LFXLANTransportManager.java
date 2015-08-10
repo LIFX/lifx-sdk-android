@@ -107,70 +107,88 @@ public class LFXLANTransportManager extends LFXTransportManager implements LFXGa
     }
 
     public void sendMessage(LFXMessage message) {
-        LFXLog.d(TAG, "sendMessage()");
+        LFXLog.i(TAG, "sendMessage() - "+message.getType().toString());
         if (message.getPath().getSiteID().isZeroSite()) {
             for (String aGatewayHost : getGatewayHosts()) {
-                LFXGatewayConnection tcpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
+                //LFXGatewayConnection tcpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
                 LFXGatewayConnection udpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
 
-                ArrayList<LFXGatewayConnection> connections = new ArrayList<LFXGatewayConnection>();
-
-                if (tcpConnection != null) {
-                    connections.add(tcpConnection);
+                if(udpConnection!=null) {
+                    sendMessageOnConnection(message, udpConnection);
+                }
+                else {
+                    LFXLog.e(TAG,"sendMessage() - No connection?");
                 }
 
-                if (udpConnection != null) {
-                    connections.add(udpConnection);
-                }
 
-                LFXGatewayConnection connectionToUse = null;
+// CAKEY123445 - No TCP Support so removed transport
 
-                if (connections.size() > 0) {
-                    connectionToUse = connections.get(0);
-                }
-
-                if (connectionToUse != null) {
-                    sendMessageOnConnection(message, connectionToUse);
-                }
+//                ArrayList<LFXGatewayConnection> connections = new ArrayList<LFXGatewayConnection>();
+//
+//                if (tcpConnection != null) {
+//                    connections.add(tcpConnection);
+//                }
+//
+//                if (udpConnection != null) {
+//                    connections.add(udpConnection);
+//                }
+//
+//                LFXGatewayConnection connectionToUse = null;
+//
+//                if (connections.size() > 0) {
+//                    connectionToUse = connections.get(0);
+//                }
+//
+//                if (connectionToUse != null) {
+//                    sendMessageOnConnection(message, connectionToUse);
+//                }
             }
-        } else {
+        }
+        else {
             boolean messageWasSent = false;
             for (String aGatewayHost : getGatewayHostsForSiteID(message.getPath().getSiteID())) {
-                LFXGatewayConnection tcpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
+                //LFXGatewayConnection tcpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_TCP);
                 LFXGatewayConnection udpConnection = getGatewayConnectionForHost(aGatewayHost, Service.LX_PROTOCOL_DEVICE_SERVICE_UDP);
 
-                ArrayList<LFXGatewayConnection> connections = new ArrayList<LFXGatewayConnection>();
-                if (message.prefersUDPOverTCP()) {
-                    if (udpConnection != null) {
-                        connections.add(udpConnection);
-                    }
-
-                    if (tcpConnection != null) {
-                        connections.add(tcpConnection);
-                    }
-                } else {
-                    if (tcpConnection != null) {
-                        connections.add(tcpConnection);
-                    }
-
-                    if (udpConnection != null) {
-                        connections.add(udpConnection);
-                    }
-                }
-
-                LFXGatewayConnection connectionToUse = null;
-
-                if (connections.size() > 0) {
-                    connectionToUse = connections.get(0);
-                }
-
-                if (connectionToUse != null) {
-                    sendMessageOnConnection(message, connectionToUse);
+                if(udpConnection!=null) {
+                    sendMessageOnConnection(message, udpConnection);
                     messageWasSent = true;
                 }
+
+// CAKEY123445 - No TCP Support so removed transport
+
+//                ArrayList<LFXGatewayConnection> connections = new ArrayList<LFXGatewayConnection>();
+//                if (message.prefersUDPOverTCP()) {
+//                    if (udpConnection != null) {
+//                        connections.add(udpConnection);
+//                    }
+//
+//                    if (tcpConnection != null) {
+//                        connections.add(tcpConnection);
+//                    }
+//                } else {
+//                    if (tcpConnection != null) {
+//                        connections.add(tcpConnection);
+//                    }
+//
+//                    if (udpConnection != null) {
+//                        connections.add(udpConnection);
+//                    }
+//                }
+//
+//                LFXGatewayConnection connectionToUse = null;
+//
+//                if (connections.size() > 0) {
+//                    connectionToUse = connections.get(0);
+//                }
+//
+//                if (connectionToUse != null) {
+//                    sendMessageOnConnection(message, connectionToUse);
+//                    messageWasSent = true;
+//                }
             }
 
-            if (messageWasSent == false) {
+            if (!messageWasSent) {
                 sendMessageOnConnection(message, broadcastUDPConnection);
             }
         }

@@ -103,14 +103,9 @@ public class LFXRoutingTable {
     }
 
     public void updateSiteID(LFXSiteID siteID) {
-
-        for(LFXSiteID siteTest:mutableSiteIDs) {
-            if(siteTest.equals(siteID)) return;
+        if (mutableSiteIDs.contains(siteID)) {
+            return;
         }
-//        if (mutableSiteIDs.contains(siteID)) {
-//            return;
-//        }
-
         mutableSiteIDs.add(siteID);
     }
 

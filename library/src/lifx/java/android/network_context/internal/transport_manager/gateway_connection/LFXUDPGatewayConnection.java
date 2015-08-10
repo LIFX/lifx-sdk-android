@@ -92,8 +92,13 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
         }
 
         if (getConnectionState() == LFXGatewayConnectionState.CONNECTED) {
-            LFXMessage message = LFXMessage.messageWithTypeAndPath(Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY, getGatewayDescriptor().getPath());
-            sendMessage(message);
+            if(getGatewayDescriptor().getPath()!=null) {
+                LFXMessage message = LFXMessage.messageWithTypeAndPath(Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY, getGatewayDescriptor().getPath());
+                sendMessage(message);
+            }
+            else {
+                LFXLog.e(TAG,"heartbeatTimerDidFire() - getGatewayDescriptor().getPath()==null");
+            }
         }
     }
 
@@ -231,8 +236,11 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
         LFXMessage message = LFXMessage.messageWithMessageData(data);
 
         if (message == null) {
-            LFXLog.e(TAG, "udpSocketDidReceiveDataFromAddressWithFilterContext() - Couldn't create message from data: " + Arrays.toString(data));
+            LFXLog.e(TAG, "udpSocketRx() - Couldn't create message from data: " + Arrays.toString(data));
             return;
+        }
+        else {
+            LFXLog.i(TAG, "udpSocketRx() - Got: "+message.getType().toString());
         }
 
         if (getListener() != null) {

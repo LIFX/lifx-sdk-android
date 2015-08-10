@@ -95,6 +95,9 @@ public class LFXGatewayDiscoveryController {
             LFXLog.e(TAG, "handleStatePANGatewayMessage() - TCP Protocol unsupported");
             return;
         }
+        else {
+            LFXLog.i(TAG, "handleStatePANGatewayMessage() - "+service.toString());
+        }
 
         LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService(host, port, path, service);
 

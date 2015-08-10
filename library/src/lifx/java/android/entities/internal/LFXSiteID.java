@@ -64,12 +64,13 @@ public class LFXSiteID {
         return getDebugStringValue();
     }
 
-    public boolean equals(LFXSiteID aSiteID) {
+    @Override
+    public boolean equals(Object aSiteID) {
         if (aSiteID == null) {
             return false;
         }
 
-        if (!LFXByteUtils.areByteArraysEqual(data, aSiteID.data)) {
+        if (!LFXByteUtils.areByteArraysEqual(data, ((LFXSiteID)aSiteID).data)) {
             return false;
         }
 

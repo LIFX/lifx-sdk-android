@@ -200,20 +200,23 @@ public class LFXLight extends LFXLightTarget {
     }
 
     public void labelDidChangeTo(String label) {
-        notifyListenerLabelDidChange(label);
-
+        if(this.label==null || !this.label.equals(label)) {
+            notifyListenerLabelDidChange(label);
+        }
         this.label = label;
     }
 
     public void colorDidChangeTo(LFXHSBKColor color) {
-        notifyListenersColorDidChange(color);
-
+        if(this.color==null || !this.color.equals(color)) {
+            notifyListenersColorDidChange(color);
+        }
         this.color = color;
     }
 
     public void powerDidChangeTo(LFXPowerState powerState) {
-        notifyListenersPowerStateDidChange(powerState);
-
+        if(this.powerState==null || !this.powerState.equals(powerState)) {
+            notifyListenersPowerStateDidChange(powerState);
+        }
         this.powerState = powerState;
     }
 

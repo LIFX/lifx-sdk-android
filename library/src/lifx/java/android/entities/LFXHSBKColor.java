@@ -107,15 +107,17 @@ public class LFXHSBKColor implements Cloneable {
         return newColor;
     }
 
-    public boolean equals(LFXHSBKColor aColor) {
+    @Override
+    public boolean equals(Object aColor) {
         if (aColor == null) {
             return false;
         }
 
-        if (aColor.hue != this.hue ||
-                aColor.saturation != this.saturation ||
-                aColor.brightness != this.brightness ||
-                aColor.kelvin != this.kelvin) {
+
+        if (((LFXHSBKColor)aColor).hue != this.hue ||
+                ((LFXHSBKColor)aColor).saturation != this.saturation ||
+                ((LFXHSBKColor)aColor).brightness != this.brightness ||
+                ((LFXHSBKColor)aColor).kelvin != this.kelvin) {
             return false;
         }
 

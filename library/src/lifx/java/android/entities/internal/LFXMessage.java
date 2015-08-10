@@ -10,6 +10,7 @@ package lifx.java.android.entities.internal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import lifx.java.android.entities.internal.LFXBinaryTargetID.LFXBinaryTargetType;
 import lifx.java.android.entities.internal.LFXBinaryTargetID.TagField;
@@ -177,6 +178,8 @@ public class LFXMessage {
 
         try {
             payload = messagePayloadClass.getDeclaredConstructor(new Class[]{byte[].class, int.class}).newInstance(data, PAYLOAD_START_INDEX);
+        } catch (NullPointerException e) {
+            LFXLog.e(TAG,"getPayloadFromMessageData() - No implementation for "+messageType.toString());
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -194,7 +197,7 @@ public class LFXMessage {
 
     public static LFXMessage messageWithMessageData(byte[] data) {
         if (data == null || data.length == 0 || getTypeFromMessageData(data) == null) {
-            LFXLog.w(TAG, "Warning: invalid type" + StructleTypes.getShortValue(data[32], data[33]));
+            LFXLog.w(TAG, "Warning: invalid type: " + StructleTypes.getShortValue(data[32], data[33]));
             return null;
         }
 
@@ -416,7 +419,12 @@ public class LFXMessage {
         writeIsAddressableToMessage(true, data);
         writeAtTimeToMessage(atTime, data);
         writeTypeToMessage(messageType, data);
-        writeSiteIDToMessage(path.getSiteID().getDataValue(), data);
+        if(path!=null && path.getSiteID()!=null) {
+            writeSiteIDToMessage(path.getSiteID().getDataValue(), data);
+        }
+        else {
+            LFXLog.e(TAG,"getMessageDataRepresentation() - Message with no path/siteId:"+ Arrays.toString(data));
+        }
 
         if (path.getBinaryTargetID().geTargetType() == LFXBinaryTargetType.DEVICE) {
             writeTargetIDtoMessage(path.getBinaryTargetID().getDeviceDataValue(), data);
