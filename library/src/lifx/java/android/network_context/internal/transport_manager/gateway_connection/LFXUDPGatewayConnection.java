@@ -71,15 +71,13 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
     public LFXUDPGatewayConnection(LFXGatewayDescriptor gatewayDescriptor, LFXGatewayConnectionListener listener) {
         super(gatewayDescriptor, listener);
-        LFXLog.d(TAG, "LFXUDPGatewayConnection() - Constructor");
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
         messageOutbox = new LinkedList<LFXMessage>();
-        LFXLog.i(TAG, "Making Outbox Timer task.");
         outboxTimer = LFXTimerUtils.getTimerTaskWithPeriod(getOutBoxTimerTask(), LFXSDKConstants.LFX_UDP_MESSAGE_SEND_RATE_LIMIT_INTERVAL, false, "SendRateLimitTimer");
         socket = new LFXSocketUDP();
-        LFXLog.i(TAG, "Making Heartbeat Timer task.");
         heartbeatTimer = LFXTimerUtils.getTimerTaskWithPeriod(getHeartbeatTimerTask(), LFXSDKConstants.LFX_UDP_HEARTBEAT_INTERVAL, false, "UDPHeartbeatTimer");
         resetIdleTimeoutTimer();
+        LFXLog.d(TAG, "LFXUDPGatewayConnection() - Constructor, HeartBeat, SendRate & Idle Timer Tasks");
     }
 
     public boolean isBroadcastConnection() {
@@ -204,7 +202,7 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     }
 
     public void idleTimeoutTimerDidFire() {
-        LFXLog.w(TAG, "idleTimeoutTimerDidFire() - Occured on UDP Connection " + toString() + ", disconnecting");
+        LFXLog.w(TAG, "idleTimeoutTimerDidFire() - Occurred on UDP Connection " + toString() + ", disconnecting");
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
         getListener().gatewayConnectionDidDisconnectWithError(this, null);
     }
@@ -240,7 +238,7 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
             return;
         }
         else {
-            LFXLog.i(TAG, "udpSocketRx() - Got: "+message.getType().toString());
+            LFXLog.i(TAG, "udpSocketRx() - Got: " + message.getType().toString());
         }
 
         if (getListener() != null) {
@@ -267,11 +265,20 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     @Override
     public void disconnect() {
         socket.close();
-        heartbeatTimer.cancel();
-        outboxTimer.cancel();
-
+        if(heartbeatTimer!=null) {
+            heartbeatTimer.cancel();
+            heartbeatTimer.purge();
+            heartbeatTimer = null;
+        }
+        if(outboxTimer!=null) {
+            outboxTimer.cancel();
+            outboxTimer.purge();
+            outboxTimer = null;
+        }
         if (idleTimeoutTimer != null) {
             idleTimeoutTimer.cancel();
+            idleTimeoutTimer.purge();
+            idleTimeoutTimer=null;
         }
     }
 
