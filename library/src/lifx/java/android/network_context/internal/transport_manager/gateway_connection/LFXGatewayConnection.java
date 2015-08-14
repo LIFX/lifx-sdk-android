@@ -36,11 +36,6 @@ public abstract class LFXGatewayConnection {
         CONNECTED,
     }
 
-    ;
-
-    public void setListener(LFXGatewayConnectionListener listener) {
-        this.listener = listener;
-    }
 
     public static LFXGatewayConnection getGatewayConnectionWithGatewayDescriptor(LFXGatewayDescriptor gatewayDescriptor, LFXGatewayConnectionListener listener) {
         // TODO: implement TCP
@@ -87,6 +82,10 @@ public abstract class LFXGatewayConnection {
 
     protected LFXGatewayConnectionListener getListener() {
         return listener;
+    }
+
+    public void setListener(LFXGatewayConnectionListener listener) {
+        this.listener = listener;
     }
 
     // To be called externally (subclasses to override)

@@ -204,7 +204,7 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     public void idleTimeoutTimerDidFire() {
         LFXLog.w(TAG, "idleTimeoutTimerDidFire() - Occurred on UDP Connection " + toString() + ", disconnecting");
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, null);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, null);
     }
 
     private void udpSocketDidReceiveDataFromAddressWithFilterContext(LFXSocketGeneric socket, byte[] data, byte[] address, Object filterContext) {
@@ -254,12 +254,12 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
     public void udpSocketDidCloseWithError(LFXSocketGeneric socket, String error) {
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, error);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, error);
     }
 
     public void udpSocketDidNotConnect(LFXSocketGeneric socket, String error) {
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, error);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, error);
     }
 
     @Override
@@ -291,14 +291,14 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     public void notifySocketStateChanged(LFXSocketGeneric socket, SocketState state) {
         switch (state) {
             case CONNECTED:
-                getListener().gatewayConnectionDidConnect(this);
+                if(getListener()!=null) getListener().gatewayConnectionDidConnect(this);
                 break;
 
             case CONNECTING:
                 break;
 
             case DISCONNECTED:
-                getListener().gatewayConnectionDidDisconnectWithError(this, "");
+                if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, "");
                 break;
         }
     }

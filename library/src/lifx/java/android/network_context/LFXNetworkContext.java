@@ -218,58 +218,63 @@ public class LFXNetworkContext implements LFXTransportManagerListener {
             // DeviceMapping tells us the SiteID and TagField of this device
             LFXDeviceMapping deviceMapping = routingTable.getDeviceMappingForDeviceID(aLight.getDeviceID());
 
-            // Now we need to find the tags corresponding to the SiteID and Tagfield
-            ArrayList<LFXTaggedLightCollection> oldTaggedCollections = aLight.getTaggedCollections();
+            if(deviceMapping!=null) {
+                // Now we need to find the tags corresponding to the SiteID and Tagfield
+                ArrayList<LFXTaggedLightCollection> oldTaggedCollections = aLight.getTaggedCollections();
 
-            ArrayList<String> tagsForThisLight = new ArrayList<String>();
-            ArrayList<LFXTaggedLightCollection> taggedCollectionsThisLightShouldBeIn = new ArrayList<LFXTaggedLightCollection>();
+                ArrayList<String> tagsForThisLight = new ArrayList<String>();
+                ArrayList<LFXTaggedLightCollection> taggedCollectionsThisLightShouldBeIn = new ArrayList<LFXTaggedLightCollection>();
 
-            ArrayList<LFXTaggedLightCollection> collectionsToAddThisLightTo = new ArrayList<LFXTaggedLightCollection>();
+                ArrayList<LFXTaggedLightCollection> collectionsToAddThisLightTo = new ArrayList<LFXTaggedLightCollection>();
 
-            ArrayList<TagField> tagFields = LFXBinaryTargetID.enumerateTagField(deviceMapping.getTagField());
+                ArrayList<TagField> tagFields = LFXBinaryTargetID.enumerateTagField(deviceMapping.getTagField());
 
-            for (TagField singularTagField : tagFields) {
-                LFXTagMapping tagMapping = routingTable.getTagMappingForSiteIDAndTagField(deviceMapping.getSiteID(), singularTagField);
-                if (tagMapping == null) {
-                    return;
+                for (TagField singularTagField : tagFields) {
+                    LFXTagMapping tagMapping = routingTable.getTagMappingForSiteIDAndTagField(deviceMapping.getSiteID(), singularTagField);
+                    if (tagMapping == null) {
+                        return;
+                    }
+
+                    String tag = tagMapping.getTag();
+
+                    LFXTaggedLightCollection collection = getTaggedLightCollectionForTag(tag);
+                    tagsForThisLight.add(tag);
+                    taggedCollectionsThisLightShouldBeIn.add(collection);
+
+                    if (collection.getLights().contains(aLight) == false) {
+                        collectionsToAddThisLightTo.add(collection);
+                    }
                 }
 
-                String tag = tagMapping.getTag();
+                Set<LFXTaggedLightCollection> collectionsToRemoveThisLightFrom = new HashSet<LFXTaggedLightCollection>(oldTaggedCollections);
+                collectionsToRemoveThisLightFrom.removeAll(new HashSet<LFXTaggedLightCollection>(taggedCollectionsThisLightShouldBeIn));
 
-                LFXTaggedLightCollection collection = getTaggedLightCollectionForTag(tag);
-                tagsForThisLight.add(tag);
-                taggedCollectionsThisLightShouldBeIn.add(collection);
+                for (LFXTaggedLightCollection aCollection : collectionsToRemoveThisLightFrom) {
+                    ArrayList<String> tempTags = aLight.getTags();
+                    tempTags.remove(aCollection.getTag());
+                    aLight.setTags(tempTags);
 
-                if (collection.getLights().contains(aLight) == false) {
-                    collectionsToAddThisLightTo.add(collection);
+                    ArrayList<LFXTaggedLightCollection> tempCols = aLight.getTaggedCollections();
+                    tempCols.remove(aCollection);
+                    aLight.setTaggedCollections(tempCols);
+
+                    aCollection.removeLight(aLight);
+                }
+
+                for (LFXTaggedLightCollection aCollection : collectionsToAddThisLightTo) {
+                    ArrayList<String> tempTags = aLight.getTags();
+                    tempTags.add(aCollection.getTag());
+                    aLight.setTags(tempTags);
+
+                    ArrayList<LFXTaggedLightCollection> tempCols = aLight.getTaggedCollections();
+                    tempCols.add(aCollection);
+                    aLight.setTaggedCollections(tempCols);
+
+                    aCollection.addLight(aLight);
                 }
             }
-
-            Set<LFXTaggedLightCollection> collectionsToRemoveThisLightFrom = new HashSet<LFXTaggedLightCollection>(oldTaggedCollections);
-            collectionsToRemoveThisLightFrom.removeAll(new HashSet<LFXTaggedLightCollection>(taggedCollectionsThisLightShouldBeIn));
-
-            for (LFXTaggedLightCollection aCollection : collectionsToRemoveThisLightFrom) {
-                ArrayList<String> tempTags = aLight.getTags();
-                tempTags.remove(aCollection.getTag());
-                aLight.setTags(tempTags);
-
-                ArrayList<LFXTaggedLightCollection> tempCols = aLight.getTaggedCollections();
-                tempCols.remove(aCollection);
-                aLight.setTaggedCollections(tempCols);
-
-                aCollection.removeLight(aLight);
-            }
-
-            for (LFXTaggedLightCollection aCollection : collectionsToAddThisLightTo) {
-                ArrayList<String> tempTags = aLight.getTags();
-                tempTags.add(aCollection.getTag());
-                aLight.setTags(tempTags);
-
-                ArrayList<LFXTaggedLightCollection> tempCols = aLight.getTaggedCollections();
-                tempCols.add(aCollection);
-                aLight.setTaggedCollections(tempCols);
-
-                aCollection.addLight(aLight);
+            else {
+                LFXLog.e(TAG,"updateDeviceTagMembershipsFromRoutingTable() - Null mapping for ID:"+aLight.getDeviceID());
             }
         }
     }
