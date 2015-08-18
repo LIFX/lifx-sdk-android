@@ -35,6 +35,9 @@ public class LFXGatewayDiscoveryController {
 
     private LFXGatewayDiscoveryControllerListener listener;
     private boolean ended = false;
+    private Timer discoveryTimer;
+    private LFXLANTransportManager transportManager;
+    private ArrayList<LFXGatewayDiscoveryTableEntry> table;
 
     // This property will change how often DeviceGetPanGateway messages are broadcast
     private LFXGatewayDiscoveryMode discoveryMode;
@@ -68,11 +71,6 @@ public class LFXGatewayDiscoveryController {
         public void gatewayDiscoveryControllerDidUpdateEntry(LFXGatewayDiscoveryController table, LFXGatewayDiscoveryTableEntry tableEntry, boolean entryIsNew);
     }
 
-    private Timer discoveryTimer;
-
-    private LFXLANTransportManager transportManager;
-    private ArrayList<LFXGatewayDiscoveryTableEntry> table;
-
     @SuppressWarnings({"unchecked", "unused"})
     private ArrayList<LFXGatewayDiscoveryTableEntry> getAllGatewayDiscoveryTableEntries() {
         return (ArrayList<LFXGatewayDiscoveryTableEntry>) table.clone();
@@ -94,6 +92,9 @@ public class LFXGatewayDiscoveryController {
         if (service == Service.LX_PROTOCOL_DEVICE_SERVICE_TCP) {
             LFXLog.e(TAG, "handleStatePANGatewayMessage() - TCP Protocol unsupported");
             return;
+        }
+        else {
+            LFXLog.i(TAG, "handleStatePANGatewayMessage() - " + service.toString());
         }
 
         LFXGatewayDescriptor gatewayDescriptor = LFXGatewayDescriptor.getGatewayDescriptorWithHostPortPathService(host, port, path, service);
@@ -143,8 +144,6 @@ public class LFXGatewayDiscoveryController {
     }
 
     public void configureTimerForDiscoveryMode(LFXGatewayDiscoveryMode discoveryMode) {
-        LFXLog.d(TAG, "DISCOVERYMODE: " + discoveryMode);
-
         long duration = 1000;
         switch (discoveryMode) {
             case NORMAL:
@@ -160,7 +159,7 @@ public class LFXGatewayDiscoveryController {
             discoveryTimer.purge();
         }
 
-        LFXLog.d(TAG, "Making Discovery Timer task. Period: " + duration);
+        LFXLog.d(TAG, "configureTimerForDiscoveryMode() - Mode="+discoveryMode+" Timer Period: " + duration);
         discoveryTimer = LFXTimerUtils.getTimerTaskWithPeriod(getDiscoverTimerTask(), duration, false, "DisoveryTimer");
     }
 
@@ -174,8 +173,8 @@ public class LFXGatewayDiscoveryController {
         if (discoveryTimer != null) {
             discoveryTimer.cancel();
             discoveryTimer.purge();
+            discoveryTimer=null;
         }
-
         ended = true;
     }
 }

@@ -71,15 +71,13 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
     public LFXUDPGatewayConnection(LFXGatewayDescriptor gatewayDescriptor, LFXGatewayConnectionListener listener) {
         super(gatewayDescriptor, listener);
-        LFXLog.d(TAG, "LFXUDPGatewayConnection() - Constructor");
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
         messageOutbox = new LinkedList<LFXMessage>();
-        LFXLog.i(TAG, "Making Outbox Timer task.");
         outboxTimer = LFXTimerUtils.getTimerTaskWithPeriod(getOutBoxTimerTask(), LFXSDKConstants.LFX_UDP_MESSAGE_SEND_RATE_LIMIT_INTERVAL, false, "SendRateLimitTimer");
         socket = new LFXSocketUDP();
-        LFXLog.i(TAG, "Making Heartbeat Timer task.");
         heartbeatTimer = LFXTimerUtils.getTimerTaskWithPeriod(getHeartbeatTimerTask(), LFXSDKConstants.LFX_UDP_HEARTBEAT_INTERVAL, false, "UDPHeartbeatTimer");
         resetIdleTimeoutTimer();
+        LFXLog.d(TAG, "LFXUDPGatewayConnection() - Constructor, HeartBeat, SendRate & Idle Timer Tasks");
     }
 
     public boolean isBroadcastConnection() {
@@ -92,8 +90,13 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
         }
 
         if (getConnectionState() == LFXGatewayConnectionState.CONNECTED) {
-            LFXMessage message = LFXMessage.messageWithTypeAndPath(Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY, getGatewayDescriptor().getPath());
-            sendMessage(message);
+            if(getGatewayDescriptor().getPath()!=null) {
+                LFXMessage message = LFXMessage.messageWithTypeAndPath(Type.LX_PROTOCOL_DEVICE_GET_PAN_GATEWAY, getGatewayDescriptor().getPath());
+                sendMessage(message);
+            }
+            else {
+                LFXLog.e(TAG,"heartbeatTimerDidFire() - getGatewayDescriptor().getPath()==null");
+            }
         }
     }
 
@@ -199,9 +202,9 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     }
 
     public void idleTimeoutTimerDidFire() {
-        LFXLog.w(TAG, "idleTimeoutTimerDidFire() - Occured on UDP Connection " + toString() + ", disconnecting");
+        LFXLog.w(TAG, "idleTimeoutTimerDidFire() - Occurred on UDP Connection " + toString() + ", disconnecting");
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, null);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, null);
     }
 
     private void udpSocketDidReceiveDataFromAddressWithFilterContext(LFXSocketGeneric socket, byte[] data, byte[] address, Object filterContext) {
@@ -231,8 +234,11 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
         LFXMessage message = LFXMessage.messageWithMessageData(data);
 
         if (message == null) {
-            LFXLog.e(TAG, "udpSocketDidReceiveDataFromAddressWithFilterContext() - Couldn't create message from data: " + Arrays.toString(data));
+            LFXLog.e(TAG, "udpSocketRx() - Couldn't create message from data: " + Arrays.toString(data));
             return;
+        }
+        else {
+            LFXLog.i(TAG, "udpSocketRx() - Got: " + message.getType().toString());
         }
 
         if (getListener() != null) {
@@ -248,22 +254,31 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
 
     public void udpSocketDidCloseWithError(LFXSocketGeneric socket, String error) {
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, error);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, error);
     }
 
     public void udpSocketDidNotConnect(LFXSocketGeneric socket, String error) {
         setConnectionState(LFXGatewayConnectionState.NOT_CONNECTED);
-        getListener().gatewayConnectionDidDisconnectWithError(this, error);
+        if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, error);
     }
 
     @Override
     public void disconnect() {
         socket.close();
-        heartbeatTimer.cancel();
-        outboxTimer.cancel();
-
+        if(heartbeatTimer!=null) {
+            heartbeatTimer.cancel();
+            heartbeatTimer.purge();
+            heartbeatTimer = null;
+        }
+        if(outboxTimer!=null) {
+            outboxTimer.cancel();
+            outboxTimer.purge();
+            outboxTimer = null;
+        }
         if (idleTimeoutTimer != null) {
             idleTimeoutTimer.cancel();
+            idleTimeoutTimer.purge();
+            idleTimeoutTimer=null;
         }
     }
 
@@ -276,14 +291,14 @@ public class LFXUDPGatewayConnection extends LFXGatewayConnection implements Soc
     public void notifySocketStateChanged(LFXSocketGeneric socket, SocketState state) {
         switch (state) {
             case CONNECTED:
-                getListener().gatewayConnectionDidConnect(this);
+                if(getListener()!=null) getListener().gatewayConnectionDidConnect(this);
                 break;
 
             case CONNECTING:
                 break;
 
             case DISCONNECTED:
-                getListener().gatewayConnectionDidDisconnectWithError(this, "");
+                if(getListener()!=null) getListener().gatewayConnectionDidDisconnectWithError(this, "");
                 break;
         }
     }
